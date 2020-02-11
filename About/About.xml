@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ModMetaData>
+	<name>Quick Fast</name>
+	<author>Dubwise</author>
+	<url></url>
+	  <supportedVersions>
+    <li>1.0</li>
+  </supportedVersions>
+	<description>Equip apparel quickly</description>
+</ModMetaData>
