@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -17,7 +17,7 @@ namespace QuickFast
     {
         public QuickFast(ModContentPack content) : base(content)
         {
-            HarmonyInstance.Create("QuickFast").PatchAll();
+          new  Harmony("QuickFast").PatchAll();
         }
     }
 
