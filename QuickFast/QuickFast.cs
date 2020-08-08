@@ -32,7 +32,8 @@ namespace QuickFast
 
             listing_Standard.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
             listing_Standard.CheckboxLabeled("Hide hats when indoors", ref HatsIndoors);
-
+            listing_Standard.GapLine();
+            listing_Standard.Label("Apparel equip speed");
             listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
 
             if (FlatRate)
