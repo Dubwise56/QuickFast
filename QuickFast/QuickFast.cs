@@ -17,7 +17,8 @@ namespace QuickFast
         public float EquipModPC = 0.2f;
         public int EquipModTicks = 10;
         public bool FlatRate = true;
-        public bool HideHats = true;
+        public bool HatsSleeping = true;
+        public bool HatsIndoors = true;
         private string buf;
         private Listing_Standard listing_Standard;
 
@@ -29,12 +30,15 @@ namespace QuickFast
 
             listing_Standard.Begin(canvas.ContractedBy(60f));
 
+            listing_Standard.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
+            listing_Standard.CheckboxLabeled("Hide hats when indoors", ref HatsIndoors);
+
             listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
 
             if (FlatRate)
             {
                 listing_Standard.LabelDouble("Equip speed Ticks", $"{EquipModTicks} ticks");
-               listing_Standard.IntEntry(ref EquipModTicks, ref buf);
+                listing_Standard.IntEntry(ref EquipModTicks, ref buf);
             }
             else
             {
@@ -45,12 +49,13 @@ namespace QuickFast
             listing_Standard.End();
         }
 
-         
+
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_Values.Look(ref FlatRate, "FlatRate");
-            Scribe_Values.Look(ref HideHats, "HideHats");
+            Scribe_Values.Look(ref HatsIndoors, "HatsIndoors");
+            Scribe_Values.Look(ref HatsSleeping, "HatsSleeping");
             Scribe_Values.Look(ref EquipModPC, "EquipModPC");
             Scribe_Values.Look(ref EquipModTicks, "EquipModTicks");
         }
@@ -113,6 +118,11 @@ namespace QuickFast
 
         public static void Prefix_0(object __instance)
         {
+            if (!QuickFast.Settings.HatsSleeping)
+            {
+                return;
+            }
+
             Toil toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
             var bed = toil.actor.CurrentBed();
             if (bed != null && !bed.def.building.bed_showSleeperBody)
@@ -124,6 +134,11 @@ namespace QuickFast
 
         public static void Prefix_2(object __instance)
         {
+            if (!QuickFast.Settings.HatsSleeping)
+            {
+                return;
+            }
+
             Toil toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
             toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
         }
@@ -136,7 +151,7 @@ namespace QuickFast
     {
         public static void Postfix(Pawn_DraftController __instance)
         {
-            if (!QuickFast.Settings.HideHats)
+            if (!QuickFast.Settings.HatsIndoors)
             {
                 return;
             }
@@ -162,7 +177,7 @@ namespace QuickFast
     {
         public static void Postfix(Pawn_PathFollower __instance)
         {
-            if (!QuickFast.Settings.HideHats)
+            if (!QuickFast.Settings.HatsIndoors)
             {
                 return;
             }
@@ -199,7 +214,7 @@ namespace QuickFast
     {
         public static void Postfix(Pawn_PathFollower __instance)
         {
-            if (!QuickFast.Settings.HideHats)
+            if (!QuickFast.Settings.HatsIndoors)
             {
                 return;
             }
