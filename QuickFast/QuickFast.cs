@@ -12,7 +12,49 @@ using Verse.AI;
 
 namespace QuickFast
 {
+    public class Settings : ModSettings
+    {
+        public float EquipModPC = 0.2f;
+        public int EquipModTicks = 10;
+        public bool FlatRate = true;
+        public bool HideHats = true;
+        private string buf;
+        private Listing_Standard listing_Standard;
 
+        public void DoWindowContents(Rect canvas)
+        {
+            Rect nifta = canvas.ContractedBy(40f);
+            listing_Standard = new Listing_Standard();
+            listing_Standard.ColumnWidth = (nifta.width - 40f) / 2f;
+
+            listing_Standard.Begin(canvas.ContractedBy(60f));
+
+            listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
+
+            if (FlatRate)
+            {
+                listing_Standard.LabelDouble("Equip speed Ticks", $"{EquipModTicks} ticks");
+               listing_Standard.IntEntry(ref EquipModTicks, ref buf);
+            }
+            else
+            {
+                listing_Standard.LabelDouble("Equip speed %", $"{EquipModPC.ToStringPercent()}");
+                EquipModPC = listing_Standard.Slider(EquipModPC, 0, 1f);
+            }
+
+            listing_Standard.End();
+        }
+
+         
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref FlatRate, "FlatRate");
+            Scribe_Values.Look(ref HideHats, "HideHats");
+            Scribe_Values.Look(ref EquipModPC, "EquipModPC");
+            Scribe_Values.Look(ref EquipModTicks, "EquipModTicks");
+        }
+    }
 
     public class QuickFast : Mod
     {
@@ -20,6 +62,8 @@ namespace QuickFast
         {
             var harmony = new Harmony("QuickFast");
             harmony.PatchAll();
+
+            Settings = base.GetSettings<Settings>();
 
             MethodInfo b__0 = null;
             MethodInfo b__2 = null;
@@ -54,6 +98,19 @@ namespace QuickFast
                 harmony.Patch(b__2, Prefix);
             }
         }
+
+        public static Settings Settings;
+
+        public override void DoSettingsWindowContents(Rect canvas)
+        {
+            Settings.DoWindowContents(canvas);
+        }
+
+        public override string SettingsCategory()
+        {
+            return "Quick Fast";
+        }
+
         public static void Prefix_0(object __instance)
         {
             Toil toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
@@ -73,20 +130,106 @@ namespace QuickFast
     }
 
 
-    //[HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal), typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
-    //[HarmonyBefore("rimworld.facialstuff.mod")]
-    //public static class Patch_PawnRenderer
-    //{
-    //    private static void Prefix(PawnRenderer __instance, ref bool portrait)
-    //    {
-    //        var pawn = __instance.pawn;
-    //        if (portrait == false && pawn.CurrentBed() != null)
-    //        {
-    //            pawn.Drawer.renderer.graphics.ClearCache();
-    //            pawn.Drawer.renderer.graphics.apparelGraphics.Clear();
-    //        }
-    //    }
-    //}
+    [HarmonyPatch(typeof(Pawn_DraftController))]
+    [HarmonyPatch(nameof(Pawn_DraftController.Drafted), MethodType.Setter)]
+    public static class H_Drafted
+    {
+        public static void Postfix(Pawn_DraftController __instance)
+        {
+            if (!QuickFast.Settings.HideHats)
+            {
+                return;
+            }
+
+            if (__instance.draftedInt)
+            {
+                __instance.pawn?.Drawer?.renderer?.graphics?.ResolveApparelGraphics();
+            }
+            else
+            {
+                if (!__instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.Map))
+                {
+                    __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                        x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn_PathFollower))]
+    [HarmonyPatch(nameof(Pawn_PathFollower.StartPath))]
+    public static class H_StartPath
+    {
+        public static void Postfix(Pawn_PathFollower __instance)
+        {
+            if (!QuickFast.Settings.HideHats)
+            {
+                return;
+            }
+
+            if (__instance.pawn.AnimalOrWildMan())
+            {
+                return;
+            }
+
+            if (__instance.pawn.Drafted)
+            {
+                //     return;
+            }
+
+            var UsesOutdoorTemperature = __instance.nextCell.UsesOutdoorTemperature(__instance.pawn.Map);
+
+            if (!UsesOutdoorTemperature)
+            {
+                __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+            }
+
+            if (UsesOutdoorTemperature)
+            {
+                __instance.pawn?.Drawer?.renderer?.graphics?.ResolveApparelGraphics();
+            }
+
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn_PathFollower))]
+    [HarmonyPatch(nameof(Pawn_PathFollower.TryEnterNextPathCell))]
+    public static class H_TryEnterNextPathCell
+    {
+        public static void Postfix(Pawn_PathFollower __instance)
+        {
+            if (!QuickFast.Settings.HideHats)
+            {
+                return;
+            }
+
+            if (__instance.pawn.AnimalOrWildMan())
+            {
+                return;
+            }
+
+            if (__instance.pawn.Drafted)
+            {
+                //     return;
+            }
+
+            var last = __instance.lastCell.UsesOutdoorTemperature(__instance.pawn.Map);
+            var next = __instance.nextCell.UsesOutdoorTemperature(__instance.pawn.Map);
+
+            if (last && !next)
+            {
+                __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+            }
+
+            if (!last && next)
+            {
+                __instance.pawn?.Drawer?.renderer?.graphics?.ResolveApparelGraphics();
+            }
+
+        }
+    }
 
     [HarmonyPatch(typeof(JobDriver_Wear))]
     [HarmonyPatch(nameof(JobDriver_Wear.Notify_Starting))]
@@ -94,7 +237,14 @@ namespace QuickFast
     {
         public static void Postfix(JobDriver_Wear __instance)
         {
-            __instance.duration = 10;
+            if (QuickFast.Settings.FlatRate)
+            {
+                __instance.duration = QuickFast.Settings.EquipModTicks;
+            }
+            else
+            {
+                __instance.duration = (int)(__instance.duration * QuickFast.Settings.EquipModPC);
+            }
         }
     }
 
@@ -105,7 +255,14 @@ namespace QuickFast
     {
         public static void Postfix(JobDriver_Wear __instance)
         {
-            __instance.duration = 10;
+            if (QuickFast.Settings.FlatRate)
+            {
+                __instance.duration = QuickFast.Settings.EquipModTicks;
+            }
+            else
+            {
+                __instance.duration = (int)(__instance.duration * QuickFast.Settings.EquipModPC);
+            }
         }
     }
 }
