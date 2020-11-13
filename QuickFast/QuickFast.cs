@@ -290,6 +290,11 @@ namespace QuickFast
                 //     return;
             }
 
+            if (__instance.pawn.Map == null) // fix exception when pawn go outside of map
+            {
+                return;
+            }
+
             var last = __instance.lastCell.UsesOutdoorTemperature(__instance.pawn.Map);
             var next = __instance.nextCell.UsesOutdoorTemperature(__instance.pawn.Map);
 
