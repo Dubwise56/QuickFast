@@ -20,7 +20,8 @@ namespace QuickFast
         public bool FlatRate = true;
         public bool HatsSleeping = true;
         public bool HatsIndoors = true;
-        public bool HairUnderHats = true;
+        public bool HatsOnlyWhileDrafted = false;
+        public static bool HideHairUnderHats = true;
         private string buf;
         private Listing_Standard listing_Standard;
 
@@ -34,7 +35,8 @@ namespace QuickFast
 
             listing_Standard.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
             listing_Standard.CheckboxLabeled("Hide hats when indoors", ref HatsIndoors);
-            listing_Standard.CheckboxLabeled("Hair visible under hats", ref HairUnderHats);
+            listing_Standard.CheckboxLabeled("Hide hair under hats", ref HideHairUnderHats);
+            listing_Standard.CheckboxLabeled("Hats only while drafted", ref HatsOnlyWhileDrafted);
             listing_Standard.GapLine();
             listing_Standard.Label("Apparel equip speed");
             listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
@@ -57,6 +59,8 @@ namespace QuickFast
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
+            Scribe_Values.Look(ref HideHairUnderHats, "HideHairUnderHats");
             Scribe_Values.Look(ref FlatRate, "FlatRate");
             Scribe_Values.Look(ref HatsIndoors, "HatsIndoors");
             Scribe_Values.Look(ref HatsSleeping, "HatsSleeping");
@@ -156,36 +160,42 @@ namespace QuickFast
     [HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal), typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
     public static class Patch_RenderPawnInternal
     {
-        public static bool bibble;
 
-        static Vector3 AdjFert(Vector3 vec)
+        public static Vector3 offset(Vector3 vec)
         {
-            vec.y += -0.0036f;
+            if (!Settings.HideHairUnderHats)
+            {
+                vec.y += -0.0036f;
+            }
             return vec;
         }
 
-        static MethodInfo m_AdjFert = AccessTools.Method(typeof(Patch_RenderPawnInternal), "AdjFert");
+        public static FieldInfo HideHairUnderHats = AccessTools.Field(typeof(Settings), "HideHairUnderHats");
 
-          static MethodInfo HairMatAt_NewTemp = AccessTools.Method(typeof(PawnGraphicSet), "HairMatAt_NewTemp");
+        public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), "offset");
+
+        /// public static MethodInfo HairMatAt_NewTemp = AccessTools.Method(typeof(PawnGraphicSet), "HairMatAt_NewTemp");
 
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var found = false;
+            var foudnb = false;
             var struc = instructions.ToList();
             for (var index = 0; index < struc.Count; index++)
             {
                 var instruction = struc[index];
-                if (instruction.opcode == OpCodes.Stloc_S && struc[index-1].Calls(HairMatAt_NewTemp))
+                if (foudnb is false && instruction.opcode == OpCodes.Ldloc_S && struc[index + 1].opcode == OpCodes.Brtrue_S && struc[index + 2].opcode == OpCodes.Ldarg_S)
                 {
+                    foudnb = true;
                     yield return instruction;
                     yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)13);
-                    yield return new CodeInstruction(OpCodes.Callvirt, m_AdjFert);
+                    yield return new CodeInstruction(OpCodes.Call, m_offset);
                     yield return new CodeInstruction(OpCodes.Stloc_S, (byte)13);
                 }
                 else
-                if (!found && instruction.opcode == OpCodes.Ldc_I4_1 && struc[index - 1].opcode == OpCodes.Brtrue_S && struc[index + 1].opcode == OpCodes.Stloc_S)
+                if (found is false && instruction.opcode == OpCodes.Ldc_I4_1 && struc[index + 1].opcode == OpCodes.Stloc_S && struc[index - 1].opcode == OpCodes.Brtrue_S)
                 {
-                    yield return new CodeInstruction(OpCodes.Ldc_I4_0);
+                    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
                     found = true;
                 }
                 else
@@ -196,7 +206,11 @@ namespace QuickFast
 
             if (found is false)
             {
-                Log.Warning("Couldn't find Ldc_I4_1");
+                Log.Error("Couldn't find Ldc_I4_1");
+            }
+            if (foudnb is false)
+            {
+                Log.Error("Couldn't find HairMatAt_NewTemp");
             }
         }
     }
@@ -206,26 +220,30 @@ namespace QuickFast
     [HarmonyPatch(nameof(Pawn_DraftController.Drafted), MethodType.Setter)]
     public static class H_Drafted
     {
+        // public static readonly GraphicMeshSet biggerhair = new GraphicMeshSet(1.7f);
+
         public static void Postfix(Pawn_DraftController __instance)
         {
-            if (!QuickFast.Settings.HatsIndoors)
-            {
-                return;
-            }
-
             if (__instance.draftedInt)
             {
                 __instance.pawn?.Drawer?.renderer?.graphics?.ResolveApparelGraphics();
+                return;
             }
-            else
+
+            if (QuickFast.Settings.HatsOnlyWhileDrafted)
             {
-                if (!__instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.Map))
-                {
-                    __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
-                        x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
-                }
+                __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+                return;
+            }
+
+            if (QuickFast.Settings.HatsIndoors && !__instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.Map))
+            {
+                __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
             }
         }
+
     }
 
     [HarmonyPatch(typeof(Pawn_PathFollower))]
@@ -239,16 +257,21 @@ namespace QuickFast
                 return;
             }
 
-            if (!UnityData.IsInMainThread) return;
-
-            if (__instance.pawn.AnimalOrWildMan())
+            if (__instance.pawn.Map == null)
             {
                 return;
             }
 
             if (__instance.pawn.Drafted)
             {
-                //     return;
+                return;
+            }
+
+            if (!UnityData.IsInMainThread) return;
+
+            if (__instance.pawn.AnimalOrWildMan())
+            {
+                return;
             }
 
             var UsesOutdoorTemperature = __instance.nextCell.UsesOutdoorTemperature(__instance.pawn.Map);
@@ -278,6 +301,11 @@ namespace QuickFast
                 return;
             }
 
+            if (__instance.pawn.Drafted)
+            {
+                return;
+            }
+
             if (!UnityData.IsInMainThread) return;
 
             if (__instance.pawn.AnimalOrWildMan())
@@ -285,10 +313,7 @@ namespace QuickFast
                 return;
             }
 
-            if (__instance.pawn.Drafted)
-            {
-                //     return;
-            }
+
 
             var last = __instance.lastCell.UsesOutdoorTemperature(__instance.pawn.Map);
             var next = __instance.nextCell.UsesOutdoorTemperature(__instance.pawn.Map);
@@ -297,6 +322,11 @@ namespace QuickFast
             {
                 __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
                     x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+                if (__instance.pawn.Drawer.renderer.graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Middle))
+                {
+                    __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
+                        x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
+                }
             }
 
 
@@ -305,7 +335,6 @@ namespace QuickFast
             {
                 __instance.pawn?.Drawer?.renderer?.graphics?.ResolveApparelGraphics();
             }
-
         }
     }
 
