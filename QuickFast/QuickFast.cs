@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using RimWorld;
@@ -19,6 +20,7 @@ namespace QuickFast
         public bool FlatRate = true;
         public bool HatsSleeping = true;
         public bool HatsIndoors = true;
+        public bool HairUnderHats = true;
         private string buf;
         private Listing_Standard listing_Standard;
 
@@ -32,6 +34,7 @@ namespace QuickFast
 
             listing_Standard.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
             listing_Standard.CheckboxLabeled("Hide hats when indoors", ref HatsIndoors);
+            listing_Standard.CheckboxLabeled("Hair visible under hats", ref HairUnderHats);
             listing_Standard.GapLine();
             listing_Standard.Label("Apparel equip speed");
             listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
@@ -126,7 +129,7 @@ namespace QuickFast
 
             Toil toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
             var bed = toil.actor.CurrentBed();
-            if (bed != null && !bed.def.building.bed_showSleeperBody)
+            if (bed != null && toil.actor.RaceProps.Humanlike && !bed.def.building.bed_showSleeperBody)
             {
                 toil.actor.Drawer.renderer.graphics.ClearCache();
                 toil.actor.Drawer.renderer.graphics.apparelGraphics.Clear();
@@ -140,8 +143,61 @@ namespace QuickFast
                 return;
             }
 
+
             Toil toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
-            toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
+
+            if (toil.actor.RaceProps.Humanlike)
+            {
+                toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal), typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
+    public static class Patch_RenderPawnInternal
+    {
+        public static bool bibble;
+
+        static Vector3 AdjFert(Vector3 vec)
+        {
+            vec.y += -0.0036f;
+            return vec;
+        }
+
+        static MethodInfo m_AdjFert = AccessTools.Method(typeof(Patch_RenderPawnInternal), "AdjFert");
+
+          static MethodInfo HairMatAt_NewTemp = AccessTools.Method(typeof(PawnGraphicSet), "HairMatAt_NewTemp");
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var found = false;
+            var struc = instructions.ToList();
+            for (var index = 0; index < struc.Count; index++)
+            {
+                var instruction = struc[index];
+                if (instruction.opcode == OpCodes.Stloc_S && struc[index-1].Calls(HairMatAt_NewTemp))
+                {
+                    yield return instruction;
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)13);
+                    yield return new CodeInstruction(OpCodes.Callvirt, m_AdjFert);
+                    yield return new CodeInstruction(OpCodes.Stloc_S, (byte)13);
+                }
+                else
+                if (!found && instruction.opcode == OpCodes.Ldc_I4_1 && struc[index - 1].opcode == OpCodes.Brtrue_S && struc[index + 1].opcode == OpCodes.Stloc_S)
+                {
+                    yield return new CodeInstruction(OpCodes.Ldc_I4_0);
+                    found = true;
+                }
+                else
+                {
+                    yield return instruction;
+                }
+            }
+
+            if (found is false)
+            {
+                Log.Warning("Couldn't find Ldc_I4_1");
+            }
         }
     }
 
@@ -183,6 +239,8 @@ namespace QuickFast
                 return;
             }
 
+            if (!UnityData.IsInMainThread) return;
+
             if (__instance.pawn.AnimalOrWildMan())
             {
                 return;
@@ -220,6 +278,8 @@ namespace QuickFast
                 return;
             }
 
+            if (!UnityData.IsInMainThread) return;
+
             if (__instance.pawn.AnimalOrWildMan())
             {
                 return;
@@ -238,6 +298,8 @@ namespace QuickFast
                 __instance.pawn.Drawer.renderer.graphics.apparelGraphics.RemoveAll(x =>
                     x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
             }
+
+
 
             if (!last && next)
             {
