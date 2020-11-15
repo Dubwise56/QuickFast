@@ -275,6 +275,8 @@ namespace QuickFast
             return vec;
         }
 
+        public static FieldInfo f_graphics = AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.graphics));
+
         public static FieldInfo HideHairUnderHats = AccessTools.Field(typeof(Settings), "HideHairUnderHats");
 
         public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), "lorian");
@@ -294,14 +296,15 @@ namespace QuickFast
             for (var index = 0; index < struc.Count; index++)
             {
                 var instruction = struc[index];
-                if (foundcal is false && instruction.Calls(m_MeshAt) && struc[index - 2].Calls(m_get_HairMeshSet))
+                if (foundcal is false && instruction.opcode == OpCodes.Ldfld && instruction.LoadsField(f_graphics) && struc[index + 1].Calls(m_get_HairMeshSet) && struc[index + 2].opcode == OpCodes.Ldarg_S)
                 {
                     foundcal = true;
-                    yield return instruction;
+                  //  yield return instruction;
                     yield return new CodeInstruction(OpCodes.Stloc_S, (byte)15);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldarg_S, (byte)5);
                     yield return new CodeInstruction(OpCodes.Call, m_lorian);
+                    index += 3;
                 }
                 else
                 if (foudnb is false && instruction.opcode == OpCodes.Ldloc_S && struc[index + 1].opcode == OpCodes.Brtrue_S && struc[index + 2].opcode == OpCodes.Ldarg_S)
@@ -354,6 +357,11 @@ namespace QuickFast
 
         public static Mesh lorian(PawnRenderer pr, Rot4 rot)
         {
+            if (Settings.HideHairUnderHats)
+            {
+                return pr.graphics.HairMeshSet.MeshAt(rot);
+            }
+
             if (pr.pawn.story.crownType == CrownType.Average)
             {
                 if (biggerhair == null)
