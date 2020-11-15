@@ -352,14 +352,24 @@ namespace QuickFast
             if (graphics == null) return;
             if (UnityData.IsInMainThread is false) return;
 
-            if (Settings.HideHats || (Settings.HatsOnlyWhileDrafted && !pawn.Drafted))
+            if (Settings.HideHairUnderHats is false)
             {
-                graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
-
+                if (Settings.hairfilter.Contains(pawn.story.hairDef))
+                {
+                    graphics.hairGraphic = bald;
+                }
+            }
+            else
+            {
                 if (graphics.hairGraphic == bald)
                 {
                     graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
                 }
+            }
+
+            if (Settings.HideHats || (Settings.HatsOnlyWhileDrafted && !pawn.Drafted))
+            {
+                graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
             }
 
             if (Settings.HideJackets)
