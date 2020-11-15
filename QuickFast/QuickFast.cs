@@ -373,33 +373,13 @@ namespace QuickFast
             return biggerhair.MeshAt(rot);
         }
 
-        public static bool ShouldShowHats(Pawn pawn) => Settings.HideHats is false && (Settings.HatsOnlyWhileDrafted && pawn.Drafted is false);
+        public static bool ShouldShowHats(Pawn pawn) => Settings.HideHats is false && (Settings.HatsOnlyWhileDrafted is false || pawn.Drafted is false);
 
-        public static void ClearGraphics(Pawn pawn)
+        public static void SwitchIndoors(Pawn pawn)
         {
             var graphics = pawn?.Drawer?.renderer?.graphics;
             if (graphics == null) return;
             if (UnityData.IsInMainThread is false) return;
-
-            if (Settings.HideHairUnderHats is false && ShouldShowHats(pawn))
-            {
-                if (Settings.hairfilter.Contains(pawn.story.hairDef))
-                {
-                    graphics.hairGraphic = bald;
-                }
-            }
-            else
-            {
-                if (graphics.hairGraphic == bald)
-                {
-                    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
-                }
-            }
-
-            if (Settings.HideHats || (Settings.HatsOnlyWhileDrafted && !pawn.Drafted))
-            {
-                graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
-            }
 
             if (Settings.HideJackets)
             {
@@ -408,23 +388,50 @@ namespace QuickFast
                     graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
                 }
             }
+
+            if (graphics.hairGraphic == bald)
+            {
+                graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+            }
+
+            if (Settings.HideHats is true || (Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false))
+            {
+                var hidden = graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+
+                if (graphics.hairGraphic == bald)
+                {
+                    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+                }
+            }
+            else
+            {
+                if (Settings.HideHairUnderHats)
+                {
+                    if (graphics.hairGraphic == bald)
+                    {
+                        graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+                    }
+                }
+                else
+                {
+                    if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
+                    {
+                        if (Settings.hairfilter.Contains(pawn.story.hairDef))
+                        {
+                            graphics.hairGraphic = bald;
+                        }
+                    }
+                }
+            }
         }
 
-        public static void ResetGraphics(Pawn pawn)
+        public static void SwitchOutdoors(Pawn pawn)
         {
             var graphics = pawn?.Drawer?.renderer?.graphics;
             if (graphics == null)
             {
                 return;
             }
-            if (Settings.HideHairUnderHats is false && pawn.story?.hairDef != null)
-            {
-                if (Settings.hairfilter.Contains(pawn.story.hairDef))
-                {
-                    graphics.hairGraphic = bald;
-                }
-            }
-
 
             graphics.ClearCache();
             graphics.apparelGraphics.Clear();
@@ -438,50 +445,80 @@ namespace QuickFast
                     }
                 }
             }
+
+            if (Settings.HideHairUnderHats)
+            {
+                if (graphics.hairGraphic == bald)
+                {
+                    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+                }
+            }
+            else
+            {
+                if (pawn.story?.hairDef != null)
+                {
+                    if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
+                    {
+                        if (Settings.hairfilter.Contains(pawn.story.hairDef))
+                        {
+                            graphics.hairGraphic = bald;
+                        }
+                    }
+                }
+            }
         }
 
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
         {
             var map = pawn.MapHeld;
 
-            if (ass(pawn, nextCell, lastCell, map))
+            if (ShouldRun(pawn, nextCell, lastCell, map) is false)
             {
                 return;
             }
 
-            vag(pawn, startpath, nextCell);
-
-            cunt(pawn, nextCell, lastCell, map);
-        }
-
-        public static bool ass(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
-        {
-            if (Settings.HideHats is false && Settings.HideJackets is false) return true;
-
-            if (UnityData.IsInMainThread is false) return true;
-
-            if (pawn.Drafted || pawn.AnimalOrWildMan()) return true;
-
-            if (map == null) return true;
-
-            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return true;
-
-            return false;
-        }
-
-        public static void vag(Pawn pawn, bool startpath, IntVec3 nextCell)
-        {
             if (startpath)
             {
                 if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
                 {
-                    ResetGraphics(pawn);
+                    SwitchOutdoors(pawn);
                 }
                 else
                 {
-                    ClearGraphics(pawn);
+                    SwitchIndoors(pawn);
                 }
                 return;
+            }
+
+            StartPatchCheck(pawn, nextCell);
+
+            cunt(pawn, nextCell, lastCell, map);
+        }
+
+        public static bool ShouldRun(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
+        {
+            //   if (Settings.HideHats is false && Settings.HideJackets is false) return true;
+
+            if (UnityData.IsInMainThread is false) return false;
+
+            if (pawn.AnimalOrWildMan()) return false;
+
+            if (map == null) return false;
+
+            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return false;
+
+            return true;
+        }
+
+        public static void StartPatchCheck(Pawn pawn, IntVec3 nextCell)
+        {
+            if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
+            {
+                SwitchOutdoors(pawn);
+            }
+            else
+            {
+                SwitchIndoors(pawn);
             }
         }
 
@@ -492,12 +529,12 @@ namespace QuickFast
 
             if (last && !next)
             {
-                ClearGraphics(pawn);
+                SwitchIndoors(pawn);
             }
 
             if (!last && next)
             {
-                ResetGraphics(pawn);
+                SwitchOutdoors(pawn);
             }
         }
     }
@@ -508,21 +545,13 @@ namespace QuickFast
     {
         public static void Postfix(Pawn_DraftController __instance)
         {
-            if (__instance.draftedInt)
+            if (__instance.draftedInt || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld))
             {
-                bs.ResetGraphics(__instance.pawn);
+                bs.SwitchOutdoors(__instance.pawn);
             }
             else
             {
-                if (__instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld))
-                {
-                    bs.ResetGraphics(__instance.pawn);
-                }
-                else
-                {
-                    bs.ClearGraphics(__instance.pawn);
-                }
-
+                bs.SwitchIndoors(__instance.pawn);
             }
         }
     }
