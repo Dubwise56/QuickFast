@@ -424,6 +424,19 @@ namespace QuickFast
             }
 
             graphics.ResolveApparelGraphics();
+
+            graphics.ClearCache();
+            graphics.apparelGraphics.Clear();
+            using (List<Apparel>.Enumerator enumerator = graphics.pawn.apparel.WornApparel.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    if (ApparelGraphicRecordGetter.TryGetGraphicApparel(enumerator.Current, graphics.pawn.story.bodyType, out var item))
+                    {
+                        graphics.apparelGraphics.Add(item);
+                    }
+                }
+            }
         }
 
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
