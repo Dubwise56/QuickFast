@@ -373,13 +373,15 @@ namespace QuickFast
             return biggerhair.MeshAt(rot);
         }
 
+        public static bool ShouldShowHats(Pawn pawn) => Settings.HideHats is false && (Settings.HatsOnlyWhileDrafted && pawn.Drafted is false);
+
         public static void ClearGraphics(Pawn pawn)
         {
             var graphics = pawn?.Drawer?.renderer?.graphics;
             if (graphics == null) return;
             if (UnityData.IsInMainThread is false) return;
 
-            if (Settings.HideHairUnderHats is false)
+            if (Settings.HideHairUnderHats is false && ShouldShowHats(pawn))
             {
                 if (Settings.hairfilter.Contains(pawn.story.hairDef))
                 {
@@ -415,7 +417,7 @@ namespace QuickFast
             {
                 return;
             }
-            if (Settings.HideHairUnderHats is false)
+            if (Settings.HideHairUnderHats is false && pawn.story?.hairDef != null)
             {
                 if (Settings.hairfilter.Contains(pawn.story.hairDef))
                 {
@@ -426,7 +428,7 @@ namespace QuickFast
 
             graphics.ClearCache();
             graphics.apparelGraphics.Clear();
-            using (List<Apparel>.Enumerator enumerator = graphics.pawn.apparel.WornApparel.GetEnumerator())
+            using (var enumerator = graphics.pawn.apparel.WornApparel.GetEnumerator())
             {
                 while (enumerator.MoveNext())
                 {
@@ -449,7 +451,7 @@ namespace QuickFast
 
             vag(pawn, startpath, nextCell);
 
-            cunt( pawn,  nextCell,  lastCell,  map);
+            cunt(pawn, nextCell, lastCell, map);
         }
 
         public static bool ass(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
@@ -469,10 +471,6 @@ namespace QuickFast
 
         public static void vag(Pawn pawn, bool startpath, IntVec3 nextCell)
         {
-            var graphics = pawn?.Drawer?.renderer?.graphics;
-
-            if (graphics == null) return;
-
             if (startpath)
             {
                 if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
