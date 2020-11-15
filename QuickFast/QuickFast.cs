@@ -436,6 +436,8 @@ namespace QuickFast
 
             var map = pawn.MapHeld;
 
+            if (map == null) return;
+
             if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return;
 
             var graphics = pawn?.Drawer?.renderer?.graphics;
