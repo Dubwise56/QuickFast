@@ -509,7 +509,9 @@ namespace QuickFast
 
             if (UnityData.IsInMainThread is false) return false;
 
-            if (pawn.AnimalOrWildMan()) return false;
+           // if (!pawn.RaceProps.Humanlike) return false;
+
+            if (pawn.NonHumanlikeOrWildMan()) return false;
 
             if (map == null) return false;
 
