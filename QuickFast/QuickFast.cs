@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -41,7 +39,8 @@ namespace QuickFast
                 return _hairfilter;
             }
         }
-
+        public static float hairScale = 1.7f;
+        public static float hairScaleNarrow = 1.4f;
         public static float EquipModPC = 0.2f;
         public static int EquipModTicks = 10;
         public static bool FlatRate = true;
@@ -52,61 +51,91 @@ namespace QuickFast
         public static bool HideHairUnderHats = true;
         public static bool ChangeEquipSpeed = true;
         private string buf;
-        private Listing_Standard listing_Standard;
+        private Listing_Standard lis;
 
         public void DoWindowContents(Rect canvas)
         {
-            Rect nifta = canvas.ContractedBy(40f);
-            listing_Standard = new Listing_Standard();
-            listing_Standard.ColumnWidth = (nifta.width - 40f) / 2f;
+            Rect nifta = canvas;
+            lis = new Listing_Standard();
+            lis.ColumnWidth = (nifta.width - 40f) / 2f;
 
-            listing_Standard.Begin(canvas.ContractedBy(60f));
+            lis.Begin(canvas);
 
-            listing_Standard.GapLine();
-            listing_Standard.Label("Apparel visibility");
-            listing_Standard.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
-            listing_Standard.CheckboxLabeled("Hide hats when indoors", ref HideHats);
-            listing_Standard.CheckboxLabeled("Hide jackets when indoors", ref HideJackets);
-            listing_Standard.CheckboxLabeled("Hats only while drafted", ref HatsOnlyWhileDrafted);
-            listing_Standard.CheckboxLabeled("Hide hair under hats", ref HideHairUnderHats);
-            GUI.color = Color.green;
-            listing_Standard.Label("Press Ctrl + H while pawns are selected to show or hide their hairstyle under hats");
-            GUI.color = Color.white;
-            listing_Standard.GapLine();
-            listing_Standard.Label("Apparel equip speed");
-            listing_Standard.CheckboxLabeled("Change equip speeds", ref ChangeEquipSpeed);
+            lis.Label("Apparel equip speed");
+            lis.CheckboxLabeled("Change equip speeds", ref ChangeEquipSpeed);
             if (ChangeEquipSpeed)
             {
-                listing_Standard.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
+                lis.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
 
                 if (FlatRate)
                 {
-                    listing_Standard.LabelDouble("Equip speed Ticks", $"{EquipModTicks} ticks");
-                    listing_Standard.IntEntry(ref EquipModTicks, ref buf);
+                    lis.LabelDouble("Equip speed Ticks", $"{EquipModTicks} ticks");
+                    lis.IntEntry(ref EquipModTicks, ref buf);
                 }
                 else
                 {
-                    listing_Standard.LabelDouble("Equip speed %", $"{EquipModPC.ToStringPercent()}");
-                    EquipModPC = listing_Standard.Slider(EquipModPC, 0, 1f);
+                    lis.LabelDouble("Equip duration %", $"{EquipModPC.ToStringPercent()}");
+                    EquipModPC = lis.Slider(EquipModPC, 0, 1f);
                 }
             }
 
+            lis.GapLine();
+            lis.Label("Apparel visibility");
+            lis.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
+            lis.CheckboxLabeled("Hide hats when indoors", ref HideHats);
+            lis.CheckboxLabeled("Hide jackets when indoors", ref HideJackets);
+            lis.CheckboxLabeled("Hats only while drafted", ref HatsOnlyWhileDrafted);
+            lis.CheckboxLabeled("Hide hair under hats", ref HideHairUnderHats);
 
-            listing_Standard.End();
+
+            lis.Label("Hat Scaling");
+            lis.LabelDouble("Normal + Narrow Height", $"{hairScale}");
+            var tamw = decimal.Round((decimal)lis.Slider(hairScale, 1f, 2f), 2);
+            if (tamw != (decimal)hairScale)
+            {
+                hairScale = (float)tamw;
+                bs.hairScale_Changed();
+            }
+            lis.LabelDouble("Narrow Width", $"{hairScaleNarrow}");
+            tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 1f, 2f), 2);
+            if (tamw != (decimal)hairScaleNarrow)
+            {
+                hairScaleNarrow = (float)tamw;
+                bs.hairScale_Changed();
+            }
+
+            if (lis.ButtonText("Reset"))
+            {
+                hairScaleNarrow = 1.4f;
+                hairScale = 1.7f;
+                bs.hairScale_Changed();
+            }
+
+
+            GUI.color = Color.green;
+            lis.Label("Press Ctrl + H while pawns are selected to show or hide their hairstyle under hats");
+            GUI.color = Color.white;
+            lis.GapLine();
+
+
+
+            lis.End();
         }
 
         public static List<string> DefToStrings = new List<string>();
         public override void ExposeData()
         {
             base.ExposeData();
+            Scribe_Values.Look(ref hairScaleNarrow, "hairScaleNarrow", 1.4f);
+            Scribe_Values.Look(ref hairScale, "hairScale", 1.7f);
             Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
             Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
             Scribe_Values.Look(ref HideHairUnderHats, "HideHairUnderHats");
             Scribe_Values.Look(ref FlatRate, "FlatRate");
             Scribe_Values.Look(ref HideHats, "HatsIndoors");
             Scribe_Values.Look(ref HatsSleeping, "HatsSleeping");
-            Scribe_Values.Look(ref EquipModPC, "EquipModPC");
-            Scribe_Values.Look(ref EquipModTicks, "EquipModTicks");
+            Scribe_Values.Look(ref EquipModPC, "EquipModPC", 0.2f);
+            Scribe_Values.Look(ref EquipModTicks, "EquipModTicks", 10);
             Scribe_Values.Look(ref HideJackets, "HideJackets");
             Scribe_Collections.Look(ref DefToStrings, "hairFilter", LookMode.Value);
         }
@@ -316,8 +345,6 @@ namespace QuickFast
         public static GraphicMeshSet biggernarrowhair;
         public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
 
-        [TweakValue("QuickFast", 1, 2)]
-        public static float hairScale = 1.7f;
 
         public static void hairScale_Changed()
         {
@@ -331,7 +358,7 @@ namespace QuickFast
             {
                 if (biggerhair == null)
                 {
-                    biggerhair = new GraphicMeshSet(hairScale);
+                    biggerhair = new GraphicMeshSet(Settings.hairScale);
                 }
                 return biggerhair.MeshAt(rot);
             }
@@ -339,11 +366,11 @@ namespace QuickFast
             {
                 if (biggernarrowhair == null)
                 {
-                    biggernarrowhair = new GraphicMeshSet(1.4f, hairScale);
+                    biggernarrowhair = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
                 }
                 return biggernarrowhair.MeshAt(rot);
             }
-            return new GraphicMeshSet(hairScale).MeshAt(rot);// bs.biggerhair.MeshAt(rot);
+            return biggerhair.MeshAt(rot);
         }
 
         public static void ClearGraphics(Pawn pawn)
@@ -374,7 +401,7 @@ namespace QuickFast
 
             if (Settings.HideJackets)
             {
-                if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Middle))
+                if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
                 {
                     graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
                 }
