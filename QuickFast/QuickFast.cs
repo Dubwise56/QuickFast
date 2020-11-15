@@ -440,25 +440,42 @@ namespace QuickFast
 
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
         {
-            if (Settings.HideHats is false && Settings.HideJackets is false) return;
-
-            if (UnityData.IsInMainThread is false) return;
-
-            if (pawn.Drafted || pawn.AnimalOrWildMan()) return;
-
             var map = pawn.MapHeld;
 
-            if (map == null) return;
+            if (ass(pawn, nextCell, lastCell, map))
+            {
+                return;
+            }
 
-            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return;
+            vag(pawn, startpath, nextCell);
 
+            cunt( pawn,  nextCell,  lastCell,  map);
+        }
+
+        public static bool ass(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
+        {
+            if (Settings.HideHats is false && Settings.HideJackets is false) return true;
+
+            if (UnityData.IsInMainThread is false) return true;
+
+            if (pawn.Drafted || pawn.AnimalOrWildMan()) return true;
+
+            if (map == null) return true;
+
+            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return true;
+
+            return false;
+        }
+
+        public static void vag(Pawn pawn, bool startpath, IntVec3 nextCell)
+        {
             var graphics = pawn?.Drawer?.renderer?.graphics;
 
             if (graphics == null) return;
 
             if (startpath)
             {
-                if (nextCell.UsesOutdoorTemperature(map))
+                if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
                 {
                     ResetGraphics(pawn);
                 }
@@ -468,7 +485,10 @@ namespace QuickFast
                 }
                 return;
             }
+        }
 
+        public static void cunt(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
+        {
             var last = lastCell.UsesOutdoorTemperature(map);
             var next = nextCell.UsesOutdoorTemperature(map);
 
@@ -481,7 +501,6 @@ namespace QuickFast
             {
                 ResetGraphics(pawn);
             }
-
         }
     }
 
