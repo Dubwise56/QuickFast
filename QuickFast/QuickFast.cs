@@ -423,7 +423,6 @@ namespace QuickFast
                 }
             }
 
-            graphics.ResolveApparelGraphics();
 
             graphics.ClearCache();
             graphics.apparelGraphics.Clear();
