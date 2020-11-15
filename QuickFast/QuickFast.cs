@@ -246,24 +246,9 @@ namespace QuickFast
             return vec;
         }
 
-        [TweakValue("QuickFast", 1, 2)] public static float hairScale = 1.65f;
-
-        public static Mesh lorian(PawnRenderer pr, Rot4 rot)
-        {
-            if (pr.pawn.story.crownType == CrownType.Average)
-            {
-                return new GraphicMeshSet(hairScale).MeshAt(rot);// bs.biggerhair.MeshAt(rot);
-            }
-            if (pr.pawn.story.crownType == CrownType.Narrow)
-            {
-                return new GraphicMeshSet(1.4f, hairScale).MeshAt(rot);// bs.biggerhair.MeshAt(rot);
-            }
-            return new GraphicMeshSet(hairScale).MeshAt(rot);// bs.biggerhair.MeshAt(rot);
-        }
-
         public static FieldInfo HideHairUnderHats = AccessTools.Field(typeof(Settings), "HideHairUnderHats");
 
-        public static MethodInfo m_lorian = AccessTools.Method(typeof(Patch_RenderPawnInternal), "lorian");
+        public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), "lorian");
 
         public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), "offset");
 
@@ -327,9 +312,39 @@ namespace QuickFast
     [StaticConstructorOnStartup]
     public static class bs
     {
-        public static readonly GraphicMeshSet biggerhair = new GraphicMeshSet(1.7f);
-        public static readonly GraphicMeshSet biggernarrowhair = new GraphicMeshSet(1.4f, 1.7f);
+        public static GraphicMeshSet biggerhair;
+        public static GraphicMeshSet biggernarrowhair;
         public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
+
+        [TweakValue("QuickFast", 1, 2)]
+        public static float hairScale = 1.7f;
+
+        public static void hairScale_Changed()
+        {
+            biggerhair = null;
+            biggernarrowhair = null;
+        }
+
+        public static Mesh lorian(PawnRenderer pr, Rot4 rot)
+        {
+            if (pr.pawn.story.crownType == CrownType.Average)
+            {
+                if (biggerhair == null)
+                {
+                    biggerhair = new GraphicMeshSet(hairScale);
+                }
+                return biggerhair.MeshAt(rot);
+            }
+            if (pr.pawn.story.crownType == CrownType.Narrow)
+            {
+                if (biggernarrowhair == null)
+                {
+                    biggernarrowhair = new GraphicMeshSet(1.4f, hairScale);
+                }
+                return biggernarrowhair.MeshAt(rot);
+            }
+            return new GraphicMeshSet(hairScale).MeshAt(rot);// bs.biggerhair.MeshAt(rot);
+        }
 
         public static void ClearGraphics(Pawn pawn)
         {
