@@ -279,13 +279,35 @@ namespace QuickFast
             return vec;
         }
 
+        public static bool DidRenderHat(PawnRenderer pr)
+        {
+            if (Settings.HideHairUnderHats)
+            {
+                return true;
+            }
+
+            if (!Settings.HideHairUnderHats)
+            {
+                if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
         public static FieldInfo f_graphics = AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.graphics));
 
         public static FieldInfo HideHairUnderHats = AccessTools.Field(typeof(Settings), "HideHairUnderHats");
 
+        public static MethodInfo m_ShouldRenderHair = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(DidRenderHat));
+
         public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), "lorian");
 
-        public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), "offset");
+        public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(offset));
 
         public static MethodInfo m_get_HairMeshSet = AccessTools.Method(typeof(PawnGraphicSet), "get_HairMeshSet");
 
@@ -322,7 +344,9 @@ namespace QuickFast
                 else
                 if (found is false && instruction.opcode == OpCodes.Ldc_I4_1 && struc[index + 1].opcode == OpCodes.Stloc_S && struc[index - 1].opcode == OpCodes.Brtrue_S)
                 {
-                    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(OpCodes.Call, m_ShouldRenderHair);
+                //    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
                     found = true;
                 }
                 else
@@ -428,7 +452,7 @@ namespace QuickFast
                     {
                         if (Settings.hairfilter.Contains(pawn.story.hairDef))
                         {
-                            graphics.hairGraphic = bald;
+                         //   graphics.hairGraphic = bald;
                         }
                     }
                 }
@@ -471,7 +495,7 @@ namespace QuickFast
                     {
                         if (Settings.hairfilter.Contains(pawn.story.hairDef))
                         {
-                            graphics.hairGraphic = bald;
+                          //  graphics.hairGraphic = bald;
                         }
                     }
                 }
@@ -487,6 +511,8 @@ namespace QuickFast
             if (UnityData.IsInMainThread is false) return ;
 
             // if (!pawn.RaceProps.Humanlike) return false;
+
+            if (!pawn.IsColonist) return;
 
             if (pawn.NonHumanlikeOrWildMan()) return ;
 
