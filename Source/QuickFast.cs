@@ -29,7 +29,7 @@ namespace QuickFast
                     foreach (var defToString in DefToStrings)
                     {
                         var foo = DefDatabase<HairDef>.GetNamed(defToString);
-                        if (foo != null) 
+                        if (foo != null)
                         {
                             _hairfilter.Add(foo);
                         }
@@ -61,7 +61,7 @@ namespace QuickFast
 
             lis.Begin(canvas);
 
-            Text.Font = GameFont.Medium; 
+            Text.Font = GameFont.Medium;
             lis.Label("Apparel_equip_speed".Translate());
             Text.Font = GameFont.Small;
             lis.CheckboxLabeled("Change_equip_speeds".Translate(), ref ChangeEquipSpeed);
@@ -94,14 +94,14 @@ namespace QuickFast
 
             lis.Label("HatScaling".Translate());
             lis.LabelDouble("Normal__Narrow_Height".Translate(), $"{hairScale}");
-            var tamw = decimal.Round((decimal)lis.Slider(hairScale, 1f, 2f), 2);
+            var tamw = decimal.Round((decimal)lis.Slider(hairScale, 0f, 2f), 2);
             if (tamw != (decimal)hairScale)
             {
                 hairScale = (float)tamw;
                 bs.hairScale_Changed();
             }
             lis.LabelDouble("Narrow_Width".Translate(), $"{hairScaleNarrow}");
-            tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 1f, 2f), 2);
+            tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 0f, 2f), 2);
             if (tamw != (decimal)hairScaleNarrow)
             {
                 hairScaleNarrow = (float)tamw;
@@ -305,7 +305,7 @@ namespace QuickFast
 
         public static MethodInfo m_ShouldRenderHair = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(DidRenderHat));
 
-        public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), "lorian");
+        public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), nameof(bs.lorian));
 
         public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(offset));
 
@@ -325,7 +325,7 @@ namespace QuickFast
                 if (foundcal is false && instruction.opcode == OpCodes.Ldfld && instruction.LoadsField(f_graphics) && struc[index + 1].Calls(m_get_HairMeshSet) && struc[index + 2].opcode == OpCodes.Ldarg_S)
                 {
                     foundcal = true;
-                  //  yield return instruction;
+                    //  yield return instruction;
                     yield return new CodeInstruction(OpCodes.Stloc_S, (byte)15);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldarg_S, (byte)5);
@@ -346,7 +346,7 @@ namespace QuickFast
                 {
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Call, m_ShouldRenderHair);
-                //    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
+                    //    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
                     found = true;
                 }
                 else
@@ -374,17 +374,54 @@ namespace QuickFast
     {
         public static GraphicMeshSet biggerhair;
         public static GraphicMeshSet biggernarrowhair;
-     //   public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
+        //   public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
 
+
+        public static Dictionary<GraphicMeshSet, GraphicMeshSet> scalers = new Dictionary<GraphicMeshSet, GraphicMeshSet>();
 
         public static void hairScale_Changed()
         {
+            Log.Warning($"scalers length {scalers.Count}");
+            scalers = new Dictionary<GraphicMeshSet, GraphicMeshSet>();
             biggerhair = null;
             biggernarrowhair = null;
         }
 
         public static Mesh lorian(PawnRenderer pr, Rot4 rot)
         {
+            if (scalers.TryGetValue(pr.graphics.HairMeshSet, out var mehset))
+            {
+                return mehset.MeshAt(rot);
+            }
+            else
+            {
+                scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
+                return scalers[pr.graphics.HairMeshSet].MeshAt(rot);
+            }
+
+            Mesh p = pr.graphics.HairMeshSet.MeshAt(rot);
+
+            var verts = p.vertices.ToArray();
+            var vertices = new Vector3[verts.Length];
+
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                var vertex = verts[i];
+                vertex.x = vertex.x * Settings.hairScale;
+                vertex.y = vertex.y * Settings.hairScale;
+                vertex.z = vertex.z * Settings.hairScale;
+
+                vertices[i] = vertex;
+            }
+
+            //Mesh m = new Mesh();
+            //m.uv = p.uv;
+            //m.triangles = p.triangles;
+            p.vertices = vertices;
+            p.RecalculateBounds();
+
+            return p;
+
             if (Settings.HideHairUnderHats)
             {
                 return pr.graphics.HairMeshSet.MeshAt(rot);
@@ -406,6 +443,7 @@ namespace QuickFast
                 }
                 return biggernarrowhair.MeshAt(rot);
             }
+
             return biggerhair.MeshAt(rot);
         }
 
@@ -508,17 +546,17 @@ namespace QuickFast
 
             //   if (Settings.HideHats is false && Settings.HideJackets is false) return true;
 
-            if (UnityData.IsInMainThread is false) return ;
+            if (UnityData.IsInMainThread is false) return;
 
             // if (!pawn.RaceProps.Humanlike) return false;
 
+            if (map == null) return;
+
+            if (pawn.NonHumanlikeOrWildMan()) return;
+
             if (!pawn.IsColonist) return;
 
-            if (pawn.NonHumanlikeOrWildMan()) return ;
-
-            if (map == null) return ;
-
-            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return ;
+            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return;
 
             if (startpath)
             {
