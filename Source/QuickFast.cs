@@ -29,7 +29,7 @@ namespace QuickFast
                     foreach (var defToString in DefToStrings)
                     {
                         var foo = DefDatabase<HairDef>.GetNamed(defToString);
-                        if (foo != null)
+                        if (foo != null) 
                         {
                             _hairfilter.Add(foo);
                         }
@@ -61,42 +61,46 @@ namespace QuickFast
 
             lis.Begin(canvas);
 
-            lis.Label("Apparel equip speed");
-            lis.CheckboxLabeled("Change equip speeds", ref ChangeEquipSpeed);
+            Text.Font = GameFont.Medium; 
+            lis.Label("Apparel_equip_speed".Translate());
+            Text.Font = GameFont.Small;
+            lis.CheckboxLabeled("Change_equip_speeds".Translate(), ref ChangeEquipSpeed);
             if (ChangeEquipSpeed)
             {
-                lis.CheckboxLabeled("Same speed for all apparel", ref FlatRate);
+                lis.CheckboxLabeled("Same_speed_for_all_apparel".Translate(), ref FlatRate);
 
                 if (FlatRate)
                 {
-                    lis.LabelDouble("Equip speed Ticks", $"{EquipModTicks} ticks");
+                    lis.LabelDouble("Equip_speed_Ticks".Translate(), $"{EquipModTicks} ticks");
                     lis.IntEntry(ref EquipModTicks, ref buf);
                 }
                 else
                 {
-                    lis.LabelDouble("Equip duration %", $"{EquipModPC.ToStringPercent()}");
+                    lis.LabelDouble("Equip_duration".Translate(), $"{EquipModPC.ToStringPercent()}");
                     EquipModPC = lis.Slider(EquipModPC, 0, 1f);
                 }
             }
 
             lis.GapLine();
-            lis.Label("Apparel visibility");
-            lis.CheckboxLabeled("Hide hats when sleeping", ref HatsSleeping);
-            lis.CheckboxLabeled("Hide hats when indoors", ref HideHats);
-            lis.CheckboxLabeled("Hide jackets when indoors", ref HideJackets);
-            lis.CheckboxLabeled("Hats only while drafted", ref HatsOnlyWhileDrafted);
-            lis.CheckboxLabeled("Hide hair under hats", ref HideHairUnderHats);
+            Text.Font = GameFont.Medium;
+            lis.Label("Apparel_visibility".Translate());
+            Text.Font = GameFont.Small;
+            lis.CheckboxLabeled("Hide_hats_when_sleeping".Translate(), ref HatsSleeping);
+            lis.CheckboxLabeled("Hide_hats_when_indoors".Translate(), ref HideHats);
+            lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
+            lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref HatsOnlyWhileDrafted);
+            lis.CheckboxLabeled("Hide_hair_under_hats".Translate(), ref HideHairUnderHats);
 
 
-            lis.Label("Hat Scaling");
-            lis.LabelDouble("Normal + Narrow Height", $"{hairScale}");
+            lis.Label("HatScaling".Translate());
+            lis.LabelDouble("Normal__Narrow_Height".Translate(), $"{hairScale}");
             var tamw = decimal.Round((decimal)lis.Slider(hairScale, 1f, 2f), 2);
             if (tamw != (decimal)hairScale)
             {
                 hairScale = (float)tamw;
                 bs.hairScale_Changed();
             }
-            lis.LabelDouble("Narrow Width", $"{hairScaleNarrow}");
+            lis.LabelDouble("Narrow_Width".Translate(), $"{hairScaleNarrow}");
             tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 1f, 2f), 2);
             if (tamw != (decimal)hairScaleNarrow)
             {
@@ -104,7 +108,7 @@ namespace QuickFast
                 bs.hairScale_Changed();
             }
 
-            if (lis.ButtonText("Reset"))
+            if (lis.ButtonText("HairScaleReset".Translate()))
             {
                 hairScaleNarrow = 1.4f;
                 hairScale = 1.7f;
@@ -113,7 +117,7 @@ namespace QuickFast
 
 
             GUI.color = Color.green;
-            lis.Label("Press Ctrl + H while pawns are selected to show or hide their hairstyle under hats");
+            lis.Label("hatFilterTip".Translate());
             GUI.color = Color.white;
             lis.GapLine();
 
@@ -155,12 +159,12 @@ namespace QuickFast
                     if (Settings.hairfilter.Contains(pawn.story.hairDef))
                     {
                         Settings.hairfilter.Remove(pawn.story.hairDef);
-                        Log.Warning($"Removed {pawn.story.hairDef.defName} from hair filter");
+                        Log.Warning($"Hair_Filter_Remove".Translate(pawn.story.hairDef.defName));
                     }
                     else
                     {
                         Settings.hairfilter.Add(pawn.story.hairDef);
-                        Log.Warning($"Added {pawn.story.hairDef.defName} to hair filter");
+                        Log.Warning($"Hair_Filter_Add".Translate(pawn.story.hairDef.defName));
                     }
                     bs.PatherCheck(pawn, pawn.Position, pawn.Position, true);
                 }
@@ -381,8 +385,6 @@ namespace QuickFast
             return biggerhair.MeshAt(rot);
         }
 
-        public static bool ShouldShowHats(Pawn pawn) => Settings.HideHats is false && (Settings.HatsOnlyWhileDrafted is false || pawn.Drafted is false);
-
         public static void SwitchIndoors(Pawn pawn)
         {
             var graphics = pawn?.Drawer?.renderer?.graphics;
@@ -480,10 +482,17 @@ namespace QuickFast
         {
             var map = pawn.MapHeld;
 
-            if (ShouldRun(pawn, nextCell, lastCell, map) is false)
-            {
-                return;
-            }
+            //   if (Settings.HideHats is false && Settings.HideJackets is false) return true;
+
+            if (UnityData.IsInMainThread is false) return ;
+
+            // if (!pawn.RaceProps.Humanlike) return false;
+
+            if (pawn.NonHumanlikeOrWildMan()) return ;
+
+            if (map == null) return ;
+
+            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return ;
 
             if (startpath)
             {
@@ -498,30 +507,6 @@ namespace QuickFast
                 return;
             }
 
-            StartPatchCheck(pawn, nextCell);
-
-            cunt(pawn, nextCell, lastCell, map);
-        }
-
-        public static bool ShouldRun(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
-        {
-            //   if (Settings.HideHats is false && Settings.HideJackets is false) return true;
-
-            if (UnityData.IsInMainThread is false) return false;
-
-           // if (!pawn.RaceProps.Humanlike) return false;
-
-            if (pawn.NonHumanlikeOrWildMan()) return false;
-
-            if (map == null) return false;
-
-            if (!nextCell.InBounds(map) || !lastCell.InBounds(map)) return false;
-
-            return true;
-        }
-
-        public static void StartPatchCheck(Pawn pawn, IntVec3 nextCell)
-        {
             if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
             {
                 SwitchOutdoors(pawn);
@@ -530,10 +515,7 @@ namespace QuickFast
             {
                 SwitchIndoors(pawn);
             }
-        }
 
-        public static void cunt(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, Map map)
-        {
             var last = lastCell.UsesOutdoorTemperature(map);
             var next = nextCell.UsesOutdoorTemperature(map);
 
