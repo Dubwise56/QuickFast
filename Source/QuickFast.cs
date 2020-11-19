@@ -374,7 +374,7 @@ namespace QuickFast
     {
         public static GraphicMeshSet biggerhair;
         public static GraphicMeshSet biggernarrowhair;
-        public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
+     //   public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
 
 
         public static void hairScale_Changed()
@@ -423,40 +423,40 @@ namespace QuickFast
                 }
             }
 
-            if (graphics.hairGraphic == bald)
-            {
-                graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
-            }
+            //if (graphics.hairGraphic == bald)
+            //{
+            //    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+            //}
 
             if (Settings.HideHats is true || (Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false))
             {
                 var hidden = graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
 
-                if (graphics.hairGraphic == bald)
-                {
-                    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
-                }
+                //if (graphics.hairGraphic == bald)
+                //{
+                //    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+                //}
             }
-            else
-            {
-                if (Settings.HideHairUnderHats)
-                {
-                    if (graphics.hairGraphic == bald)
-                    {
-                        graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
-                    }
-                }
-                else
-                {
-                    if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
-                    {
-                        if (Settings.hairfilter.Contains(pawn.story.hairDef))
-                        {
-                         //   graphics.hairGraphic = bald;
-                        }
-                    }
-                }
-            }
+            //else
+            //{
+            //    if (Settings.HideHairUnderHats)
+            //    {
+            //        if (graphics.hairGraphic == bald)
+            //        {
+            //            graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
+            //        {
+            //            if (Settings.hairfilter.Contains(pawn.story.hairDef))
+            //            {
+            //                graphics.hairGraphic = bald;
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public static void SwitchOutdoors(Pawn pawn)
@@ -480,26 +480,26 @@ namespace QuickFast
                 }
             }
 
-            if (Settings.HideHairUnderHats)
-            {
-                if (graphics.hairGraphic == bald)
-                {
-                    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
-                }
-            }
-            else
-            {
-                if (pawn.story?.hairDef != null)
-                {
-                    if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
-                    {
-                        if (Settings.hairfilter.Contains(pawn.story.hairDef))
-                        {
-                          //  graphics.hairGraphic = bald;
-                        }
-                    }
-                }
-            }
+            //if (Settings.HideHairUnderHats)
+            //{
+            //    if (graphics.hairGraphic == bald)
+            //    {
+            //        graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
+            //    }
+            //}
+            //else
+            //{
+            //    if (pawn.story?.hairDef != null)
+            //    {
+            //        if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead))
+            //        {
+            //            if (Settings.hairfilter.Contains(pawn.story.hairDef))
+            //            {
+            //              //  graphics.hairGraphic = bald;
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
