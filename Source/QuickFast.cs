@@ -288,7 +288,7 @@ namespace QuickFast
 
         public override string SettingsCategory()
         {
-            return "Quick Fast";
+            return "Dubs Apparel Tweaks";
         }
 
         public static void fix_0(object __instance)
@@ -441,7 +441,6 @@ namespace QuickFast
 
         public static void hairScale_Changed()
         {
-            Log.Warning($"scalers length {scalers.Count}");
             scalers = new Dictionary<GraphicMeshSet, GraphicMeshSet>();
             //   biggerhair = null;
             //  biggernarrowhair = null;
