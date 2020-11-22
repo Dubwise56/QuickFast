@@ -93,7 +93,7 @@ namespace QuickFast
             lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref HatsOnlyWhileDrafted);
 
 
-            lis.GapLine();
+            lis.NewColumn();
             Text.Font = GameFont.Medium;
             lis.Label("Hair_visibility".Translate());
             Text.Font = GameFont.Small;
@@ -111,36 +111,41 @@ namespace QuickFast
                 }
             }
 
-
-            lis.Label("HatScaling".Translate());
-            lis.LabelDouble("Normal__Narrow_Height".Translate(), $"{hairScale}");
-            var tamw = decimal.Round((decimal) lis.Slider(hairScale, 0f, 2f), 2);
-            if (tamw != (decimal) hairScale)
+            if (ShowHairUnderHats)
             {
-                hairScale = (float) tamw;
-                bs.hairScale_Changed();
+              
+                lis.Label("HatScaling".Translate());
+                lis.LabelDouble("Normal__Narrow_Height".Translate(), $"{hairScale}");
+                var tamw = decimal.Round((decimal)lis.Slider(hairScale, 0f, 2f), 2);
+                if (tamw != (decimal)hairScale)
+                {
+                    hairScale = (float)tamw;
+                    bs.hairScale_Changed();
+                }
+
+                lis.LabelDouble("Narrow_Width".Translate(), $"{hairScaleNarrow}");
+                tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 0f, 2f), 2);
+                if (tamw != (decimal)hairScaleNarrow)
+                {
+                    hairScaleNarrow = (float)tamw;
+                    bs.hairScale_Changed();
+                }
+
+                if (lis.ButtonText("HairScaleReset".Translate()))
+                {
+                    hairScaleNarrow = 1.4f;
+                    hairScale = 1.7f;
+                    bs.hairScale_Changed();
+                }
+
+
+                GUI.color = Color.green;
+                lis.Label("hatFilterTip".Translate());
+                GUI.color = Color.white;
+                lis.GapLine();
             }
 
-            lis.LabelDouble("Narrow_Width".Translate(), $"{hairScaleNarrow}");
-            tamw = decimal.Round((decimal) lis.Slider(hairScaleNarrow, 0f, 2f), 2);
-            if (tamw != (decimal) hairScaleNarrow)
-            {
-                hairScaleNarrow = (float) tamw;
-                bs.hairScale_Changed();
-            }
 
-            if (lis.ButtonText("HairScaleReset".Translate()))
-            {
-                hairScaleNarrow = 1.4f;
-                hairScale = 1.7f;
-                bs.hairScale_Changed();
-            }
-
-
-            GUI.color = Color.green;
-            lis.Label("hatFilterTip".Translate());
-            GUI.color = Color.white;
-            lis.GapLine();
 
 
             lis.End();
