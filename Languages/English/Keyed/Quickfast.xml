@@ -12,11 +12,11 @@
   <Hide_hats_when_indoors>Hide hats when indoors</Hide_hats_when_indoors>
   <Hide_jackets_when_indoors>Hide jackets when indoors</Hide_jackets_when_indoors>
   <Hats_only_while_drafted>Hats only while drafted</Hats_only_while_drafted>
-  <Hide_hair_under_hats>Hide hair under hats</Hide_hair_under_hats>
+  <Show_hair_under_hats>Show hair under hats</Show_hair_under_hats>
   <HatScaling>Hat Scaling</HatScaling>
   <Normal__Narrow_Height>Normal + Narrow Height</Normal__Narrow_Height>
   <Narrow_Width>Narrow Width</Narrow_Width>
-
+  <Hair_visibility>Hair visibility</Hair_visibility>
   <HairScaleReset>Reset</HairScaleReset>
   <Hair_Filter_Remove>Removed {0} from hair filter</Hair_Filter_Remove>
   <Hair_Filter_Add>Added {0} to hair filter</Hair_Filter_Add>

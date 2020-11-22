@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -14,6 +13,21 @@ namespace QuickFast
     public class Settings : ModSettings
     {
         private static HashSet<HairDef> _hairfilter;
+        public static float hairScale = 1.7f;
+        public static float hairScaleNarrow = 1.4f;
+        public static float EquipModPC = 0.2f;
+        public static int EquipModTicks = 10;
+        public static bool FlatRate = true;
+        public static bool HatsSleeping = true;
+        public static bool HideHats = true;
+        public static bool HideJackets = true;
+        public static bool HatsOnlyWhileDrafted;
+        public static bool ShowHairUnderHats;
+        public static bool ChangeEquipSpeed = true;
+
+        public static List<string> DefToStrings = new List<string>();
+        private string buf;
+        private Listing_Standard lis;
 
         public static HashSet<HairDef> hairfilter
         {
@@ -26,6 +40,7 @@ namespace QuickFast
                     {
                         DefToStrings = new List<string>();
                     }
+
                     foreach (var defToString in DefToStrings)
                     {
                         var foo = DefDatabase<HairDef>.GetNamed(defToString);
@@ -39,23 +54,10 @@ namespace QuickFast
                 return _hairfilter;
             }
         }
-        public static float hairScale = 1.7f;
-        public static float hairScaleNarrow = 1.4f;
-        public static float EquipModPC = 0.2f;
-        public static int EquipModTicks = 10;
-        public static bool FlatRate = true;
-        public static bool HatsSleeping = true;
-        public static bool HideHats = true;
-        public static bool HideJackets = true;
-        public static bool HatsOnlyWhileDrafted = false;
-        public static bool HideHairUnderHats = true;
-        public static bool ChangeEquipSpeed = true;
-        private string buf;
-        private Listing_Standard lis;
 
         public void DoWindowContents(Rect canvas)
         {
-            Rect nifta = canvas;
+            var nifta = canvas;
             lis = new Listing_Standard();
             lis.ColumnWidth = (nifta.width - 40f) / 2f;
 
@@ -89,22 +91,41 @@ namespace QuickFast
             lis.CheckboxLabeled("Hide_hats_when_indoors".Translate(), ref HideHats);
             lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
             lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref HatsOnlyWhileDrafted);
-            lis.CheckboxLabeled("Hide_hair_under_hats".Translate(), ref HideHairUnderHats);
+
+
+            lis.GapLine();
+            Text.Font = GameFont.Medium;
+            lis.Label("Hair_visibility".Translate());
+            Text.Font = GameFont.Small;
+            var jim = ShowHairUnderHats;
+            lis.CheckboxLabeled("Show_hair_under_hats".Translate(), ref ShowHairUnderHats);
+            if (jim != ShowHairUnderHats)
+            {
+                if (ShowHairUnderHats)
+                {
+                    QuickFast.ApplyTranny();
+                }
+                else
+                {
+                    QuickFast.RemoveTranny();
+                }
+            }
 
 
             lis.Label("HatScaling".Translate());
             lis.LabelDouble("Normal__Narrow_Height".Translate(), $"{hairScale}");
-            var tamw = decimal.Round((decimal)lis.Slider(hairScale, 0f, 2f), 2);
-            if (tamw != (decimal)hairScale)
+            var tamw = decimal.Round((decimal) lis.Slider(hairScale, 0f, 2f), 2);
+            if (tamw != (decimal) hairScale)
             {
-                hairScale = (float)tamw;
+                hairScale = (float) tamw;
                 bs.hairScale_Changed();
             }
+
             lis.LabelDouble("Narrow_Width".Translate(), $"{hairScaleNarrow}");
-            tamw = decimal.Round((decimal)lis.Slider(hairScaleNarrow, 0f, 2f), 2);
-            if (tamw != (decimal)hairScaleNarrow)
+            tamw = decimal.Round((decimal) lis.Slider(hairScaleNarrow, 0f, 2f), 2);
+            if (tamw != (decimal) hairScaleNarrow)
             {
-                hairScaleNarrow = (float)tamw;
+                hairScaleNarrow = (float) tamw;
                 bs.hairScale_Changed();
             }
 
@@ -122,11 +143,9 @@ namespace QuickFast
             lis.GapLine();
 
 
-
             lis.End();
         }
 
-        public static List<string> DefToStrings = new List<string>();
         public override void ExposeData()
         {
             base.ExposeData();
@@ -134,7 +153,7 @@ namespace QuickFast
             Scribe_Values.Look(ref hairScale, "hairScale", 1.7f);
             Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
             Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
-            Scribe_Values.Look(ref HideHairUnderHats, "HideHairUnderHats");
+            Scribe_Values.Look(ref ShowHairUnderHats, "ShowHairUnderHats");
             Scribe_Values.Look(ref FlatRate, "FlatRate");
             Scribe_Values.Look(ref HideHats, "HatsIndoors");
             Scribe_Values.Look(ref HatsSleeping, "HatsSleeping");
@@ -159,20 +178,23 @@ namespace QuickFast
                     if (Settings.hairfilter.Contains(pawn.story.hairDef))
                     {
                         Settings.hairfilter.Remove(pawn.story.hairDef);
-                        Log.Warning($"Hair_Filter_Remove".Translate(pawn.story.hairDef.defName));
+                        Log.Warning("Hair_Filter_Remove".Translate(pawn.story.hairDef.defName));
                     }
                     else
                     {
                         Settings.hairfilter.Add(pawn.story.hairDef);
-                        Log.Warning($"Hair_Filter_Add".Translate(pawn.story.hairDef.defName));
+                        Log.Warning("Hair_Filter_Add".Translate(pawn.story.hairDef.defName));
                     }
+
                     bs.PatherCheck(pawn, pawn.Position, pawn.Position, true);
                 }
+
                 Settings.DefToStrings = new List<string>();
                 foreach (var s in Settings.hairfilter)
                 {
                     Settings.DefToStrings.Add(s.defName);
                 }
+
                 QuickFast.Settings.Write();
             }
         }
@@ -181,12 +203,33 @@ namespace QuickFast
 
     public class QuickFast : Mod
     {
+        private static readonly MethodInfo RenderPawnInternal = AccessTools.Method(typeof(PawnRenderer),
+            nameof(PawnRenderer.RenderPawnInternal),
+            new[]
+            {
+                typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode),
+                typeof(bool), typeof(bool), typeof(bool)
+            });
+
+        private static readonly HarmonyMethod trans =
+            new HarmonyMethod(typeof(Patch_RenderPawnInternal).GetMethod("Transpiler"));
+
+        private static readonly string harmonyID = "Quickfast";
+        public static Harmony harmony;
+
+        public static Settings Settings;
+
         public QuickFast(ModContentPack content) : base(content)
         {
-            var harmony = new Harmony("QuickFast");
+            harmony = new Harmony(harmonyID);
             harmony.PatchAll();
 
-            Settings = base.GetSettings<Settings>();
+            Settings = GetSettings<Settings>();
+
+            if (Settings.ShowHairUnderHats)
+            {
+                ApplyTranny();
+            }
 
             MethodInfo b__0 = null;
             MethodInfo b__2 = null;
@@ -222,7 +265,16 @@ namespace QuickFast
             }
         }
 
-        public static Settings Settings;
+        public static void RemoveTranny()
+        {
+            harmony.Unpatch(RenderPawnInternal, HarmonyPatchType.Transpiler, harmonyID);
+        }
+
+        public static void ApplyTranny()
+        {
+            harmony.Patch(RenderPawnInternal, transpiler: trans);
+            Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
+        }
 
         public override void DoSettingsWindowContents(Rect canvas)
         {
@@ -266,27 +318,42 @@ namespace QuickFast
         }
     }
 
-    [HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal), typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
+    //   [HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal), typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
     public static class Patch_RenderPawnInternal
     {
+        public static FieldInfo f_graphics = AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.graphics));
+
+        //  public static FieldInfo ShowHairUnderHats = AccessTools.Field(typeof(Settings), "ShowHairUnderHats");
+
+        public static MethodInfo m_ShouldRenderHair =
+            AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(DidRenderHat));
+
+        public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), nameof(bs.lorian));
+
+        public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(offset));
+
+        public static MethodInfo m_get_HairMeshSet = AccessTools.Method(typeof(PawnGraphicSet), "get_HairMeshSet");
+
+        public static MethodInfo m_MeshAt = AccessTools.Method(typeof(GraphicMeshSet), nameof(GraphicMeshSet.MeshAt));
 
         public static Vector3 offset(Vector3 vec)
         {
-            if (!Settings.HideHairUnderHats)
+            if (Settings.ShowHairUnderHats)
             {
                 vec.y += -0.0036f;
             }
+
             return vec;
         }
 
         public static bool DidRenderHat(PawnRenderer pr)
         {
-            if (Settings.HideHairUnderHats)
+            if (!Settings.ShowHairUnderHats)
             {
                 return true;
             }
 
-            if (!Settings.HideHairUnderHats)
+            if (Settings.ShowHairUnderHats)
             {
                 if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
                 {
@@ -299,21 +366,7 @@ namespace QuickFast
             return true;
         }
 
-        public static FieldInfo f_graphics = AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.graphics));
-
-        public static FieldInfo HideHairUnderHats = AccessTools.Field(typeof(Settings), "HideHairUnderHats");
-
-        public static MethodInfo m_ShouldRenderHair = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(DidRenderHat));
-
-        public static MethodInfo m_lorian = AccessTools.Method(typeof(bs), nameof(bs.lorian));
-
-        public static MethodInfo m_offset = AccessTools.Method(typeof(Patch_RenderPawnInternal), nameof(offset));
-
-        public static MethodInfo m_get_HairMeshSet = AccessTools.Method(typeof(PawnGraphicSet), "get_HairMeshSet");
-
-        public static MethodInfo m_MeshAt = AccessTools.Method(typeof(GraphicMeshSet), nameof(GraphicMeshSet.MeshAt));
-
-        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var found = false;
             var foudnb = false;
@@ -322,31 +375,32 @@ namespace QuickFast
             for (var index = 0; index < struc.Count; index++)
             {
                 var instruction = struc[index];
-                if (foundcal is false && instruction.opcode == OpCodes.Ldfld && instruction.LoadsField(f_graphics) && struc[index + 1].Calls(m_get_HairMeshSet) && struc[index + 2].opcode == OpCodes.Ldarg_S)
+                if (foundcal is false && instruction.opcode == OpCodes.Ldfld && instruction.LoadsField(f_graphics) &&
+                    struc[index + 1].Calls(m_get_HairMeshSet) && struc[index + 2].opcode == OpCodes.Ldarg_S)
                 {
                     foundcal = true;
                     //  yield return instruction;
-                    yield return new CodeInstruction(OpCodes.Stloc_S, (byte)15);
+                    yield return new CodeInstruction(OpCodes.Stloc_S, (byte) 15);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldarg_S, (byte)5);
+                    yield return new CodeInstruction(OpCodes.Ldarg_S, (byte) 5);
                     yield return new CodeInstruction(OpCodes.Call, m_lorian);
                     index += 3;
                 }
-                else
-                if (foudnb is false && instruction.opcode == OpCodes.Ldloc_S && struc[index + 1].opcode == OpCodes.Brtrue_S && struc[index + 2].opcode == OpCodes.Ldarg_S)
+                else if (foudnb is false && instruction.opcode == OpCodes.Ldloc_S &&
+                         struc[index + 1].opcode == OpCodes.Brtrue_S && struc[index + 2].opcode == OpCodes.Ldarg_S)
                 {
                     foudnb = true;
                     yield return instruction;
-                    yield return new CodeInstruction(OpCodes.Ldloc_S, (byte)13);
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, (byte) 13);
                     yield return new CodeInstruction(OpCodes.Call, m_offset);
-                    yield return new CodeInstruction(OpCodes.Stloc_S, (byte)13);
+                    yield return new CodeInstruction(OpCodes.Stloc_S, (byte) 13);
                 }
-                else
-                if (found is false && instruction.opcode == OpCodes.Ldc_I4_1 && struc[index + 1].opcode == OpCodes.Stloc_S && struc[index - 1].opcode == OpCodes.Brtrue_S)
+                else if (found is false && instruction.opcode == OpCodes.Ldc_I4_1 &&
+                         struc[index + 1].opcode == OpCodes.Stloc_S && struc[index - 1].opcode == OpCodes.Brtrue_S)
                 {
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Call, m_ShouldRenderHair);
-                    //    yield return new CodeInstruction(OpCodes.Ldsfld, HideHairUnderHats);
+                    //    yield return new CodeInstruction(OpCodes.Ldsfld, ShowHairUnderHats);
                     found = true;
                 }
                 else
@@ -354,14 +408,17 @@ namespace QuickFast
                     yield return instruction;
                 }
             }
+
             if (foundcal is false)
             {
                 Log.Error("Couldn't find get_HairMeshSet");
             }
+
             if (found is false)
             {
                 Log.Error("Couldn't find Ldc_I4_1");
             }
+
             if (foudnb is false)
             {
                 Log.Error("Couldn't find HairMatAt_NewTemp");
@@ -372,79 +429,68 @@ namespace QuickFast
     [StaticConstructorOnStartup]
     public static class bs
     {
-        public static GraphicMeshSet biggerhair;
-        public static GraphicMeshSet biggernarrowhair;
+        //    public static GraphicMeshSet biggerhair;
+        //    public static GraphicMeshSet biggernarrowhair;
         //   public static Graphic bald = GraphicDatabase.Get<Graphic_Multi>("Things/Pawn/Humanlike/Hairs/Shaved", ShaderDatabase.Transparent, Vector2.one, Color.clear);
 
 
-        public static Dictionary<GraphicMeshSet, GraphicMeshSet> scalers = new Dictionary<GraphicMeshSet, GraphicMeshSet>();
+        public static Dictionary<GraphicMeshSet, GraphicMeshSet> scalers =
+            new Dictionary<GraphicMeshSet, GraphicMeshSet>();
 
         public static void hairScale_Changed()
         {
             Log.Warning($"scalers length {scalers.Count}");
             scalers = new Dictionary<GraphicMeshSet, GraphicMeshSet>();
-            biggerhair = null;
-            biggernarrowhair = null;
+            //   biggerhair = null;
+            //  biggernarrowhair = null;
         }
 
         public static Mesh lorian(PawnRenderer pr, Rot4 rot)
         {
-            if (scalers.TryGetValue(pr.graphics.HairMeshSet, out var mehset))
-            {
-                return mehset.MeshAt(rot);
-            }
-            else
-            {
-                scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
-                return scalers[pr.graphics.HairMeshSet].MeshAt(rot);
-            }
-
-            Mesh p = pr.graphics.HairMeshSet.MeshAt(rot);
-
-            var verts = p.vertices.ToArray();
-            var vertices = new Vector3[verts.Length];
-
-            for (var i = 0; i < vertices.Length; i++)
-            {
-                var vertex = verts[i];
-                vertex.x = vertex.x * Settings.hairScale;
-                vertex.y = vertex.y * Settings.hairScale;
-                vertex.z = vertex.z * Settings.hairScale;
-
-                vertices[i] = vertex;
-            }
-
-            //Mesh m = new Mesh();
-            //m.uv = p.uv;
-            //m.triangles = p.triangles;
-            p.vertices = vertices;
-            p.RecalculateBounds();
-
-            return p;
-
-            if (Settings.HideHairUnderHats)
+            if (!Settings.ShowHairUnderHats)
             {
                 return pr.graphics.HairMeshSet.MeshAt(rot);
             }
 
-            if (pr.pawn.story.crownType == CrownType.Average)
+            if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
             {
-                if (biggerhair == null)
-                {
-                    biggerhair = new GraphicMeshSet(Settings.hairScale);
-                }
-                return biggerhair.MeshAt(rot);
-            }
-            if (pr.pawn.story.crownType == CrownType.Narrow)
-            {
-                if (biggernarrowhair == null)
-                {
-                    biggernarrowhair = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
-                }
-                return biggernarrowhair.MeshAt(rot);
+                return pr.graphics.HairMeshSet.MeshAt(rot);
             }
 
-            return biggerhair.MeshAt(rot);
+            try
+            {
+                return scalers[pr.graphics.HairMeshSet].MeshAt(rot);
+            }
+            catch
+            {
+                if (pr.pawn.story.crownType == CrownType.Narrow)
+                {
+                    scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
+                }
+
+                scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScale);
+                return scalers[pr.graphics.HairMeshSet].MeshAt(rot);
+            }
+
+
+            //if (pr.pawn.story.crownType == CrownType.Average)
+            //{
+            //    if (biggerhair == null)
+            //    {
+            //        biggerhair = new GraphicMeshSet(Settings.hairScale);
+            //    }
+            //    return biggerhair.MeshAt(rot);
+            //}
+            //if (pr.pawn.story.crownType == CrownType.Narrow)
+            //{
+            //    if (biggernarrowhair == null)
+            //    {
+            //        biggernarrowhair = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
+            //    }
+            //    return biggernarrowhair.MeshAt(rot);
+            //}
+
+            //return biggerhair.MeshAt(rot);
         }
 
         public static void SwitchIndoors(Pawn pawn)
@@ -453,11 +499,15 @@ namespace QuickFast
             if (graphics == null) return;
             if (UnityData.IsInMainThread is false) return;
 
+
+
             if (Settings.HideJackets)
             {
-                if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
+                if (graphics.apparelGraphics.Any(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
                 {
-                    graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
+                    graphics.apparelGraphics.RemoveAll(x =>
+                        x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
                 }
             }
 
@@ -466,18 +516,20 @@ namespace QuickFast
             //    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
             //}
 
-            if (Settings.HideHats is true || (Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false))
+            if (Settings.HideHats is true || Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false)
             {
-                var hidden = graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
+                var hidden = graphics.apparelGraphics.RemoveAll(x =>
+                    x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Overhead);
 
                 //if (graphics.hairGraphic == bald)
                 //{
                 //    graphics.hairGraphic = GraphicDatabase.Get<Graphic_Multi>(pawn.story.hairDef.texPath, ShaderDatabase.Transparent, Vector2.one, pawn.story.hairColor);
                 //}
             }
+
             //else
             //{
-            //    if (Settings.HideHairUnderHats)
+            //    if (!Settings.ShowHairUnderHats)
             //    {
             //        if (graphics.hairGraphic == bald)
             //        {
@@ -505,20 +557,24 @@ namespace QuickFast
                 return;
             }
 
+
+
+
             graphics.ClearCache();
             graphics.apparelGraphics.Clear();
             using (var enumerator = graphics.pawn.apparel.WornApparel.GetEnumerator())
             {
                 while (enumerator.MoveNext())
                 {
-                    if (ApparelGraphicRecordGetter.TryGetGraphicApparel(enumerator.Current, graphics.pawn.story.bodyType, out var item))
+                    if (ApparelGraphicRecordGetter.TryGetGraphicApparel(enumerator.Current,
+                        graphics.pawn.story.bodyType, out var item))
                     {
                         graphics.apparelGraphics.Add(item);
                     }
                 }
             }
 
-            //if (Settings.HideHairUnderHats)
+            //if (!Settings.ShowHairUnderHats)
             //{
             //    if (graphics.hairGraphic == bald)
             //    {
@@ -568,6 +624,7 @@ namespace QuickFast
                 {
                     SwitchIndoors(pawn);
                 }
+
                 return;
             }
 
@@ -615,14 +672,28 @@ namespace QuickFast
     [HarmonyPatch(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath))]
     public static class H_StartPath
     {
-        public static void Postfix(Pawn_PathFollower __instance) => bs.PatherCheck(__instance.pawn, __instance.nextCell, __instance.lastCell, true);
+        public static void Postfix(Pawn_PathFollower __instance)
+        {
+            if (__instance.pawn.Drafted)
+            {
+                return;
+            }
+            bs.PatherCheck(__instance.pawn, __instance.nextCell, __instance.lastCell, true);
+        }
     }
 
     [HarmonyPatch(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.TryEnterNextPathCell))]
     [StaticConstructorOnStartup]
     public static class H_TryEnterNextPathCell
     {
-        public static void Postfix(Pawn_PathFollower __instance) => bs.PatherCheck(__instance.pawn, __instance.nextCell, __instance.lastCell, false);
+        public static void Postfix(Pawn_PathFollower __instance)
+        {
+            if (__instance.pawn.Drafted)
+            {
+                return;
+            }
+            bs.PatherCheck(__instance.pawn, __instance.nextCell, __instance.lastCell, false);
+        }
     }
 
     [HarmonyPatch(typeof(JobDriver_Wear), nameof(JobDriver_Wear.Notify_Starting))]
@@ -636,7 +707,7 @@ namespace QuickFast
             }
             else
             {
-                __instance.duration = (int)(__instance.duration * Settings.EquipModPC);
+                __instance.duration = (int) (__instance.duration * Settings.EquipModPC);
             }
         }
     }
@@ -653,7 +724,7 @@ namespace QuickFast
             }
             else
             {
-                __instance.duration = (int)(__instance.duration * Settings.EquipModPC);
+                __instance.duration = (int) (__instance.duration * Settings.EquipModPC);
             }
         }
     }
