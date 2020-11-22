@@ -262,11 +262,11 @@ namespace QuickFast
 
             if (b__0 != null && b__2 != null)
             {
-                var Prefix = new HarmonyMethod(typeof(QuickFast).GetMethod("Prefix_0"));
-                harmony.Patch(b__0, Prefix);
+                var Prefix = new HarmonyMethod(typeof(QuickFast).GetMethod(nameof(fix_0)));
+                harmony.Patch(b__0, null, Prefix);
 
-                Prefix = new HarmonyMethod(typeof(QuickFast).GetMethod("Prefix_2"));
-                harmony.Patch(b__2, Prefix);
+                Prefix = new HarmonyMethod(typeof(QuickFast).GetMethod(nameof(fix_2)));
+                harmony.Patch(b__2, null, Prefix);
             }
         }
 
@@ -278,7 +278,7 @@ namespace QuickFast
         public static void ApplyTranny()
         {
             harmony.Patch(RenderPawnInternal, transpiler: trans);
-            Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
+          //  Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
         }
 
         public override void DoSettingsWindowContents(Rect canvas)
@@ -291,15 +291,14 @@ namespace QuickFast
             return "Quick Fast";
         }
 
-        public static void Prefix_0(object __instance)
+        public static void fix_0(object __instance)
         {
             if (!Settings.HatsSleeping)
             {
                 return;
             }
-
             var toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
-            var bed = toil.actor.CurrentBed();
+            var bed = toil?.actor.CurrentBed();
             if (bed != null && toil.actor.RaceProps.Humanlike && !bed.def.building.bed_showSleeperBody)
             {
                 toil.actor.Drawer.renderer.graphics.ClearCache();
@@ -307,16 +306,14 @@ namespace QuickFast
             }
         }
 
-        public static void Prefix_2(object __instance)
+        public static void fix_2(object __instance)
         {
             if (!Settings.HatsSleeping)
             {
                 return;
             }
 
-            var toil = AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) as Toil;
-
-            if (toil.actor.RaceProps.Humanlike)
+            if (AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) is Toil toil && toil.actor.RaceProps.Humanlike)
             {
                 toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
             }
