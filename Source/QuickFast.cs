@@ -13,7 +13,7 @@ namespace QuickFast
     public class Settings : ModSettings
     {
         private static HashSet<HairDef> _hairfilter;
-        public static float hairScale = 1.7f;
+        public static float hairScale = 1.6f;
         public static float hairScaleNarrow = 1.4f;
         public static float EquipModPC = 0.2f;
         public static int EquipModTicks = 10;
@@ -155,7 +155,7 @@ namespace QuickFast
         {
             base.ExposeData();
             Scribe_Values.Look(ref hairScaleNarrow, "hairScaleNarrow", 1.4f);
-            Scribe_Values.Look(ref hairScale, "hairScale", 1.7f);
+            Scribe_Values.Look(ref hairScale, "hairScale", 1.6f);
             Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
             Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
             Scribe_Values.Look(ref ShowHairUnderHats, "ShowHairUnderHats");
