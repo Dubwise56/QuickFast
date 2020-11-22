@@ -5,7 +5,6 @@
   <author>Dubwise</author>
   <url>https://github.com/Dubwise56/QuickFast</url>
   <supportedVersions>
-    <li>1.1</li>
     <li>1.2</li>
   </supportedVersions>
   <packageId>Dubwise.QuickFast</packageId>

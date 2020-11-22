@@ -340,32 +340,32 @@ namespace QuickFast
 
         public static Vector3 offset(Vector3 vec)
         {
-            if (Settings.ShowHairUnderHats)
-            {
+          //  if (Settings.ShowHairUnderHats)
+          //  {
                 vec.y += -0.0036f;
-            }
+           // }
 
             return vec;
         }
 
         public static bool DidRenderHat(PawnRenderer pr)
         {
-            if (!Settings.ShowHairUnderHats)
-            {
-                return true;
-            }
+          //  if (!Settings.ShowHairUnderHats)
+           // {
+          //      return true;
+          //  }
 
-            if (Settings.ShowHairUnderHats)
-            {
+         //   if (Settings.ShowHairUnderHats)
+         //   {
                 if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
                 {
                     return true;
                 }
 
                 return false;
-            }
+          //  }
 
-            return true;
+          //  return true;
         }
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -448,10 +448,10 @@ namespace QuickFast
 
         public static Mesh lorian(PawnRenderer pr, Rot4 rot)
         {
-            if (!Settings.ShowHairUnderHats)
-            {
-                return pr.graphics.HairMeshSet.MeshAt(rot);
-            }
+          //  if (!Settings.ShowHairUnderHats)
+          //  {
+         //       return pr.graphics.HairMeshSet.MeshAt(rot);
+          //  }
 
             if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
             {
@@ -468,8 +468,11 @@ namespace QuickFast
                 {
                     scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScaleNarrow, Settings.hairScale);
                 }
+                else
+                {
+                    scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScale);
+                }
 
-                scalers[pr.graphics.HairMeshSet] = new GraphicMeshSet(Settings.hairScale);
                 return scalers[pr.graphics.HairMeshSet].MeshAt(rot);
             }
 
