@@ -132,7 +132,7 @@ namespace QuickFast
                 else
                 {
                     lis.LabelDouble("Equip_duration".Translate(), $"{EquipModPC.ToStringPercent()}");
-                    EquipModPC = lis.Slider(EquipModPC, 0.8f, 1.2f);
+                    EquipModPC = lis.Slider(EquipModPC, 0f, 1f);
                 }
             }
 
