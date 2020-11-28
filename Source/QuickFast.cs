@@ -441,17 +441,17 @@ namespace QuickFast
 
             if (f_scaler is false)
             {
-                Log.Error("Failed inject m_MeshScaler - hair under hats wont work F");
+                Log.Warning("Failed inject m_MeshScaler - hair under hats wont work F");
             }
 
             if (f_shouldrender is false)
             {
-                Log.Error("Failed inject m_ShouldRenderHair - hair under hats wont work F");
+                Log.Warning("Failed inject m_ShouldRenderHair - hair under hats wont work F");
             }
 
             if (f_offset is false)
             {
-                Log.Error("Failed inject m_offset - hair under hats wont work F");
+                Log.Warning("Failed inject m_offset - hair under hats wont work F");
             }
 
             if (!f_shouldrender || !f_offset || !f_scaler)
