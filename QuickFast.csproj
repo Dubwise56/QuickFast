@@ -76,6 +76,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\DubsApparelTweaks.cs" />
+    <Compile Include="Source\h_UIRootOnGUI.cs" />
     <Compile Include="Source\QuickFast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
