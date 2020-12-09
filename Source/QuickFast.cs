@@ -33,7 +33,7 @@ namespace QuickFast
         static bs()
         {
             MiddleHead = DefDatabase<ApparelLayerDef>.GetNamedSilentFail("MiddleHead");
-
+           
             harmony = new Harmony(harmonyID);
             harmony.PatchAll();
 
@@ -63,7 +63,7 @@ namespace QuickFast
 
             if (Settings.ShowHairUnderHats)
             {
-                ApplyTranny();
+                ApplyTrans();
             }
 
             //trick har so it loops the cached visible gear rather than getting all worn apparel
@@ -85,16 +85,19 @@ namespace QuickFast
 
         public static void killme(ref bool hideHair)
         {
-            hideHair = H_RenderPawn.HairGotFiltered;
+            if (Settings.ShowHairUnderHats)
+            {
+                hideHair = H_RenderPawn.HairGotFiltered;
+            }
         }
 
-        public static void ApplyTranny()
+        public static void ApplyTrans()
         {
             harmony.Patch(RenderPawnInternal, transpiler: trans);
             //  Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
         }
 
-        public static void RemoveTranny()
+        public static void RemoveTrans()
         {
             harmony.Unpatch(RenderPawnInternal, HarmonyPatchType.Transpiler, harmonyID);
         }

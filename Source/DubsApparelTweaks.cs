@@ -148,11 +148,11 @@ namespace QuickFast
             {
                 if (ShowHairUnderHats)
                 {
-                    bs.ApplyTranny();
+                    bs.ApplyTrans();
                 }
                 else
                 {
-                    bs.RemoveTranny();
+                    bs.RemoveTrans();
                 }
             }
 
