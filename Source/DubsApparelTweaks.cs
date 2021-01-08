@@ -36,7 +36,9 @@ namespace QuickFast
         public static bool FlatRate = true;
         public static bool HatsSleeping = true;
         public static bool HideHats = true;
+        public static bool HideEquipment = true;
         public static bool HideJackets = true;
+        public static bool EquipmentOnlyWhileDrafted;
         public static bool HatsOnlyWhileDrafted;
         public static bool JacketsOnlyWhileDrafted;
         public static bool ShowHairUnderHats;
@@ -135,8 +137,10 @@ namespace QuickFast
             lis.CheckboxLabeled("Hide_hats_when_sleeping".Translate(), ref HatsSleeping);
             lis.CheckboxLabeled("Hide_hats_when_indoors".Translate(), ref HideHats);
             lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
+            lis.CheckboxLabeled("Hide_equipment_when_indoors".Translate(), ref HideEquipment);
             lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref HatsOnlyWhileDrafted);
             lis.CheckboxLabeled("Jackets_only_while_drafted".Translate(), ref JacketsOnlyWhileDrafted);
+            lis.CheckboxLabeled("Equipment_only_while_drafted".Translate(), ref EquipmentOnlyWhileDrafted);
 
             lis.NewColumn();
             Text.Font = GameFont.Medium;
@@ -190,6 +194,7 @@ namespace QuickFast
             Scribe_Values.Look(ref hairMeshScale, "hairMeshScale", 1.06f);
             Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
             Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
+            Scribe_Values.Look(ref EquipmentOnlyWhileDrafted, "EquipmentOnlyWhileDrafted");
             Scribe_Values.Look(ref JacketsOnlyWhileDrafted, "JacketsOnlyWhileDrafted");
             Scribe_Values.Look(ref ShowHairUnderHats, "ShowHairUnderHats");
             Scribe_Values.Look(ref FlatRate, "FlatRate");
@@ -198,6 +203,7 @@ namespace QuickFast
             Scribe_Values.Look(ref EquipModPC, "EquipModPC", 0.2f);
             Scribe_Values.Look(ref EquipModTicks, "EquipModTicks", 10);
             Scribe_Values.Look(ref HideJackets, "HideJackets");
+            Scribe_Values.Look(ref HideEquipment, "HideEquipment");
             Scribe_Collections.Look(ref DefToStrings, "hairFilter", LookMode.Value);
             Scribe_Collections.Look(ref HatDefToStrings, "hatFilter", LookMode.Value);
         }

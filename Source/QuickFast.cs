@@ -33,7 +33,7 @@ namespace QuickFast
         static bs()
         {
             MiddleHead = DefDatabase<ApparelLayerDef>.GetNamedSilentFail("MiddleHead");
-           
+
             harmony = new Harmony(harmonyID);
             harmony.PatchAll();
 
@@ -180,6 +180,11 @@ namespace QuickFast
                 }
             }
 
+            if (Settings.HideEquipment is true || Settings.EquipmentOnlyWhileDrafted is true && pawn.Drafted is false)
+            {
+                graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Belt);
+            }
+
             if (Settings.HideHats is true || Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false)
             {
                 bool Match(ApparelGraphicRecord x)
@@ -310,21 +315,6 @@ namespace QuickFast
     {
         public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
 
-
-        //  public static FieldInfo f_graphics = AccessTools.Field(typeof(PawnRenderer), nameof(PawnRenderer.graphics));
-
-        //  public static FieldInfo ShowHairUnderHats = AccessTools.Field(typeof(Settings), "ShowHairUnderHats");
-
-        //    public static MethodInfo m_ShouldRenderHair = AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair));
-
-        public static MethodInfo m_MeshScaler = AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler));
-
-        public static MethodInfo m_offset = AccessTools.Method(typeof(H_RenderPawn), nameof(offset));
-
-        //  public static MethodInfo m_get_HairMeshSet = AccessTools.Method(typeof(PawnGraphicSet), "get_HairMeshSet");
-
-        // public static MethodInfo m_MeshAt = AccessTools.Method(typeof(GraphicMeshSet), nameof(GraphicMeshSet.MeshAt));
-
         public static bool HairGotFiltered;
 
         public static void hairScale_Changed()
@@ -352,15 +342,22 @@ namespace QuickFast
             }
         }
 
-        //public static bool ShouldRenderHair()
-        //{
-        //    if (HairGotFiltered)
-        //    {
-        //        return true;
-        //    }
+        public static bool ShouldRenderHair(bool HatDrawn)
+        {
+            if (HatDrawn is true)
+            {
+                if (HairGotFiltered)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
 
-        //    return false;
-        //}
+            return false;
+        }
 
         public static Vector3 offset(Vector3 vec)
         {
@@ -449,26 +446,24 @@ namespace QuickFast
                         yield return ins;
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
                         yield return new CodeInstruction(OpCodes.Ldloc_S, 15);
-                        yield return new CodeInstruction(OpCodes.Call, m_MeshScaler);
+                        yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
                         yield return new CodeInstruction(OpCodes.Stloc_S, 15);
                     }
                     else if (f_shouldrender is false && ins.oploc(OpCodes.Ldloc_S, 14))
                     {
-                        // yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        //  yield return new CodeInstruction(OpCodes.Call, m_ShouldRenderHair); 
-                        yield return new CodeInstruction(OpCodes.Ldsfld,
-                            AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
+                        yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
+                        // yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
                         yield return new CodeInstruction(OpCodes.Stloc_S, 14);
                         yield return ins;
                         f_shouldrender = true;
                     }
-                    else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) &&
-                             ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
+                    else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
                     {
                         f_offset = true;
                         yield return ins;
                         yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
-                        yield return new CodeInstruction(OpCodes.Call, m_offset);
+                        yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(offset)));
                         yield return new CodeInstruction(OpCodes.Stloc_S, 13);
                     }
                     else
