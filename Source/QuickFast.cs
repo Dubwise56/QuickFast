@@ -130,6 +130,7 @@ namespace QuickFast
                 toil.actor.RaceProps.Humanlike)
             {
                 toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
+                PortraitsCache.SetDirty(toil.actor);
             }
         }
 
@@ -195,6 +196,7 @@ namespace QuickFast
 
                 var hidden = graphics.apparelGraphics.RemoveAll(Match);
             }
+            PortraitsCache.SetDirty(pawn);
         }
 
         public static void SwitchOutdoors(Pawn pawn)
@@ -218,6 +220,7 @@ namespace QuickFast
                     }
                 }
             }
+            PortraitsCache.SetDirty(pawn);
         }
 
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
@@ -521,6 +524,7 @@ namespace QuickFast
                         {
                             instanceMapPawn.Drawer.renderer.graphics.ClearCache();
                             instanceMapPawn.Drawer.renderer.graphics.apparelGraphics.Clear();
+                            PortraitsCache.SetDirty(instanceMapPawn);
                         }
                     }
                 }
