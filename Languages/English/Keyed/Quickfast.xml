@@ -8,11 +8,17 @@
   <Equip_speed_Ticks>Equip speed Ticks</Equip_speed_Ticks>
   <Equip_duration>Equip duration %</Equip_duration>
   <Apparel_visibility>Apparel visibility</Apparel_visibility>
+
   <Hide_hats_when_sleeping>Hide hats when sleeping</Hide_hats_when_sleeping>
-  <Hide_hats_when_indoors>Hide hats when indoors</Hide_hats_when_indoors>
-  <Hide_jackets_when_indoors>Hide shell layers when indoors</Hide_jackets_when_indoors>
+
+	<IndoorHidingMode>Hide clothing indoors</IndoorHidingMode>
+	<DraftedHidingMode>Show clothing only when drafted</DraftedHidingMode>
+
+  <Hide_hats_when_indoors>Hide hats</Hide_hats_when_indoors>
+  <Hide_jackets_when_indoors>Hide shell layers</Hide_jackets_when_indoors>
   <Hats_only_while_drafted>Hats only while drafted</Hats_only_while_drafted>
-  <Hide_equipment_when_indoors>Hide belts layers when indoors</Hide_equipment_when_indoors>
+
+  <Hide_equipment_when_indoors>Hide belts layers</Hide_equipment_when_indoors>
   <Equipment_only_while_drafted>Belt layers only while drafted</Equipment_only_while_drafted>
   <Jackets_only_while_drafted>Shell layers only while drafted</Jackets_only_while_drafted>
   <Show_hair_under_hats>Show hair under hats</Show_hair_under_hats>

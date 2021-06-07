@@ -171,7 +171,7 @@ namespace QuickFast
             if (graphics == null) return;
             if (UnityData.IsInMainThread is false) return;
 
-            if (Settings.HideJackets is true || Settings.JacketsOnlyWhileDrafted is true && pawn.Drafted is false)
+            if (Settings.HideJackets is true)
             {
                 if (graphics.apparelGraphics.Any(x =>
                     x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
@@ -181,17 +181,16 @@ namespace QuickFast
                 }
             }
 
-            if (Settings.HideEquipment is true || Settings.EquipmentOnlyWhileDrafted is true && pawn.Drafted is false)
+            if (Settings.HideEquipment is true)
             {
                 graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Belt);
             }
 
-            if (Settings.HideHats is true || Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false)
+            if (Settings.HideHats is true || (Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false))
             {
                 bool Match(ApparelGraphicRecord x)
                 {
-                    return x.sourceApparel.def.apparel.layers.Any(z => z == Overhead) &&
-                           !Settings.hatfilter.Contains(x.sourceApparel.def);
+                    return x.sourceApparel.def.apparel.layers.Any(z => z == Overhead) && !Settings.hatfilter.Contains(x.sourceApparel.def);
                 }
 
                 var hidden = graphics.apparelGraphics.RemoveAll(Match);
@@ -243,26 +242,45 @@ namespace QuickFast
 
             if (startpath)
             {
-                if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
+                if (Settings.HatsOnlyWhileDrafted)
                 {
-                    SwitchOutdoors(pawn);
+	                if (pawn.Drafted)
+	                {
+		                SwitchOutdoors(pawn);
+                    }
+	                else
+	                {
+		                SwitchIndoors(pawn);
+                    }
                 }
                 else
                 {
-                    SwitchIndoors(pawn);
+	                if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
+	                {
+		                SwitchOutdoors(pawn);
+	                }
+	                else
+	                {
+		                SwitchIndoors(pawn);
+	                }
                 }
 
                 return;
             }
 
-            if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
+            if (Settings.HatsOnlyWhileDrafted)
             {
-                SwitchOutdoors(pawn);
+	            return;
             }
-            else
-            {
-                SwitchIndoors(pawn);
-            }
+
+            //if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
+            //{
+            //    SwitchOutdoors(pawn);
+            //}
+            //else
+            //{
+            //    SwitchIndoors(pawn);
+            //}
 
             var last = lastCell.UsesOutdoorTemperature(map);
             var next = nextCell.UsesOutdoorTemperature(map);
@@ -485,13 +503,20 @@ namespace QuickFast
     {
         public static void Postfix(Pawn_DraftController __instance)
         {
-            if (__instance.draftedInt || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld))
+            if (__instance.draftedInt)
             {
                 bs.SwitchOutdoors(__instance.pawn);
             }
             else
             {
-                bs.SwitchIndoors(__instance.pawn);
+	            if (Settings.HatsOnlyWhileDrafted || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld) is false)
+	            {
+		            bs.SwitchIndoors(__instance.pawn);
+                }
+	            else
+	            {
+		            bs.SwitchOutdoors(__instance.pawn);
+                }
             }
         }
     }
