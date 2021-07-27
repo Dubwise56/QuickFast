@@ -34,6 +34,7 @@ namespace QuickFast
                         Messages.Message("Hair_Filter_Add".Translate(pawn.story.hairDef.defName),
                             MessageTypeDefOf.NeutralEvent);
                     }
+                    pawn.apparel.Notify_ApparelChanged();
                 }
 
                 Settings.DefToStrings = new List<string>();

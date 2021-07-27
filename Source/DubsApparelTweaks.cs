@@ -146,12 +146,12 @@ namespace QuickFast
 			lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
 			lis.CheckboxLabeled("Hide_equipment_when_indoors".Translate(), ref HideEquipment);
 
-			if (lis.RadioButton_NewTemp("IndoorHidingMode".Translate(), HatsOnlyWhileDrafted is false, 10))
+			if (lis.RadioButton("IndoorHidingMode".Translate(), HatsOnlyWhileDrafted is false, 10))
 			{
 				HatsOnlyWhileDrafted = false;
 			}
 
-			if (lis.RadioButton_NewTemp("DraftedHidingMode".Translate(), HatsOnlyWhileDrafted, 10))
+			if (lis.RadioButton("DraftedHidingMode".Translate(), HatsOnlyWhileDrafted, 10))
 			{
 				HatsOnlyWhileDrafted = true;
 			}
