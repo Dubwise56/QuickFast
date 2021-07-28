@@ -42,7 +42,7 @@ namespace QuickFast
 		public static bool HideEquipment = true;
 		public static bool HideJackets = true;
 		//public static bool EquipmentOnlyWhileDrafted;
-		public static bool HatsOnlyWhileDrafted;
+		public static bool DraftedHidingMode;
 		//public static bool JacketsOnlyWhileDrafted;
 		public static bool ShowHairUnderHats;
 		public static bool ChangeEquipSpeed = true;
@@ -146,14 +146,14 @@ namespace QuickFast
 			lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
 			lis.CheckboxLabeled("Hide_equipment_when_indoors".Translate(), ref HideEquipment);
 
-			if (lis.RadioButton("IndoorHidingMode".Translate(), HatsOnlyWhileDrafted is false, 10))
+			if (lis.RadioButton("IndoorHidingMode".Translate(), DraftedHidingMode is false, 10))
 			{
-				HatsOnlyWhileDrafted = false;
+				DraftedHidingMode = false;
 			}
 
-			if (lis.RadioButton("DraftedHidingMode".Translate(), HatsOnlyWhileDrafted, 10))
+			if (lis.RadioButton("DraftedHidingMode".Translate(), DraftedHidingMode is true, 10))
 			{
-				HatsOnlyWhileDrafted = true;
+				DraftedHidingMode = true;
 			}
 
 
@@ -161,7 +161,7 @@ namespace QuickFast
 
 
 
-			//lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref HatsOnlyWhileDrafted);
+			//lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref DraftedHidingMode);
 			//lis.CheckboxLabeled("Jackets_only_while_drafted".Translate(), ref JacketsOnlyWhileDrafted);
 			//lis.CheckboxLabeled("Equipment_only_while_drafted".Translate(), ref EquipmentOnlyWhileDrafted);
 
@@ -216,7 +216,7 @@ namespace QuickFast
 			base.ExposeData();
 			Scribe_Values.Look(ref hairMeshScale, "hairMeshScale", 1.06f);
 			Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
-			Scribe_Values.Look(ref HatsOnlyWhileDrafted, "HatsOnlyWhileDrafted");
+			Scribe_Values.Look(ref DraftedHidingMode, "DraftedHidingMode");
 			//Scribe_Values.Look(ref EquipmentOnlyWhileDrafted, "EquipmentOnlyWhileDrafted");
 			//Scribe_Values.Look(ref JacketsOnlyWhileDrafted, "JacketsOnlyWhileDrafted");
 			Scribe_Values.Look(ref ShowHairUnderHats, "ShowHairUnderHats");

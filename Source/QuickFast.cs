@@ -18,7 +18,7 @@ namespace QuickFast
 
 
 	[StaticConstructorOnStartup]
-	public static class bs 
+	public static class bs
 	{
 		[HarmonyPatch(typeof(PawnCacheRenderer), nameof(PawnCacheRenderer.RenderPawn))]
 		public static class H_PawnCacheRendererRenderPawn
@@ -35,7 +35,7 @@ namespace QuickFast
 					return;
 				}
 
-				if (renderBody == false && !pawn.Awake())
+				if (renderBody == false && !pawn.Awake() && Settings.HatsSleeping)
 				{
 					renderHeadgear = false;
 				}
@@ -81,7 +81,7 @@ namespace QuickFast
 						return;
 					}
 
-					if (__instance.pawn.apparel.WornApparel.Any(x => x.def.apparel.LastLayer != ApparelLayerDefOf.Overhead && x.def.apparel.bodyPartGroups.Any(g => g == BodyPartGroupDefOf.UpperHead || g == BodyPartGroupDefOf.FullHead)))
+					if (__instance.ShellFullyCoversHead(flags))
 					{
 						return;
 					}
@@ -97,29 +97,27 @@ namespace QuickFast
 						GenDraw.DrawMeshNowOrLater(mesh4, vector, quat, material4, flags.FlagSet(PawnRenderFlags.DrawNow));
 					}
 				}
-
 			}
 		}
 
 		[HarmonyPatch(typeof(PawnRenderer), "<DrawHeadHair>g__DrawApparel|39_0")]
 		public static class H_g__DrawApparel
 		{
-			private static bool Prefix(ApparelGraphicRecord apparelRecord)
+			private static void Prefix(ApparelGraphicRecord apparelRecord)
 			{
 				if (Settings.ShowHairUnderHats && Math.Abs(Settings.hairMeshScale) > 0.001f)
 				{
 					H_g__MeshAt.Dewit = true;
 				}
-
-				return true;
 			}
+
 			private static void Postfix(ApparelGraphicRecord apparelRecord)
 			{
 				H_g__MeshAt.Dewit = false;
 			}
 		}
 
-		[HarmonyPatch(typeof(GenDraw), "DrawMeshNowOrLater", new []{typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(bool)})]
+		[HarmonyPatch(typeof(GenDraw), "DrawMeshNowOrLater", new[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(bool) })]
 		public static class H_g__MeshAt
 		{
 			public static bool Dewit = false;
@@ -294,30 +292,31 @@ namespace QuickFast
 			var graphics = pawn?.Drawer?.renderer?.graphics;
 			if (graphics == null) return;
 
-
-			if (Settings.HideJackets is true)
+			if ((Settings.DraftedHidingMode && pawn.Drafted is false) || (Settings.DraftedHidingMode is false && !pawn.Position.UsesOutdoorTemperature(pawn.Map)))
 			{
-				if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
+				if (Settings.HideJackets is true)
 				{
-					graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
-				}
-			}
-
-			if (Settings.HideEquipment is true)
-			{
-				graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Belt);
-			}
-
-			if (Settings.HideHats is true || (Settings.HatsOnlyWhileDrafted is true && pawn.Drafted is false))
-			{
-				bool Match(ApparelGraphicRecord x)
-				{
-					return x.sourceApparel.def.apparel.layers.Any(z => z == Overhead) && !Settings.hatfilter.Contains(x.sourceApparel.def);
+					if (graphics.apparelGraphics.Any(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.OnSkin))
+					{
+						graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Shell);
+					}
 				}
 
-				var hidden = graphics.apparelGraphics.RemoveAll(Match);
+				if (Settings.HideEquipment is true)
+				{
+					graphics.apparelGraphics.RemoveAll(x => x.sourceApparel.def.apparel.LastLayer == ApparelLayerDefOf.Belt);
+				}
+
+				if (Settings.HideHats is true)
+				{
+					bool Match(ApparelGraphicRecord x)
+					{
+						return x.sourceApparel.def.apparel.layers.Any(z => z == Overhead) && !Settings.hatfilter.Contains(x.sourceApparel.def);
+					}
+
+					var hidden = graphics.apparelGraphics.RemoveAll(Match);
+				}
 			}
-			//PortraitsCache.SetDirty(pawn);
 		}
 
 		public static void SwitchOutdoors(Pawn pawn)
@@ -369,7 +368,7 @@ namespace QuickFast
 
 			if (startpath)
 			{
-				if (Settings.HatsOnlyWhileDrafted)
+				if (Settings.DraftedHidingMode)
 				{
 					if (pawn.Drafted)
 					{
@@ -395,7 +394,7 @@ namespace QuickFast
 				return;
 			}
 
-			if (Settings.HatsOnlyWhileDrafted)
+			if (Settings.DraftedHidingMode)
 			{
 				return;
 			}
@@ -643,7 +642,7 @@ namespace QuickFast
 			}
 			else
 			{
-				if (Settings.HatsOnlyWhileDrafted || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld) is false)
+				if (Settings.DraftedHidingMode || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld) is false)
 				{
 					bs.SwitchIndoors(__instance.pawn);
 				}
