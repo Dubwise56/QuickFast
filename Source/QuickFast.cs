@@ -229,12 +229,12 @@ namespace QuickFast
 			{
 				toil?.actor?.apparel?.Notify_ApparelChanged();
 
-				//var bed = toil?.actor.CurrentBed();
-				//if (bed != null && toil.actor.RaceProps.Humanlike && !bed.def.building.bed_showSleeperBody)
-				//{
-				//	toil.actor.Drawer.renderer.graphics.ClearCache();
-				//	toil.actor.Drawer.renderer.graphics.apparelGraphics.Clear();
-				//}
+				var bed = toil?.actor.CurrentBed();
+				if (bed != null && toil.actor.RaceProps.Humanlike && !bed.def.building.bed_showSleeperBody)
+				{
+					toil.actor.Drawer.renderer.graphics.ClearCache();
+					toil.actor.Drawer.renderer.graphics.apparelGraphics.Clear();
+				}
 			}
 		}
 
@@ -248,8 +248,8 @@ namespace QuickFast
 			if (AccessTools.Field(__instance.GetType(), "layDown").GetValue(__instance) is Toil toil && toil.actor.RaceProps.Humanlike)
 			{
 				toil?.actor?.apparel?.Notify_ApparelChanged();
-				//toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
-				//PortraitsCache.SetDirty(toil.actor);
+				toil.actor.Drawer.renderer.graphics.ResolveApparelGraphics();
+				PortraitsCache.SetDirty(toil.actor);
 			}
 		}
 
