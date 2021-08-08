@@ -73,6 +73,7 @@ namespace QuickFast
 					return;
 				}
 
+
 				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
 				if (flag11)
 				{
@@ -107,6 +108,11 @@ namespace QuickFast
 			{
 				if (Settings.ShowHairUnderHats && Math.Abs(Settings.hairMeshScale) > 0.001f)
 				{
+					if (Settings.hairfilter.Contains(apparelRecord.sourceApparel.Wearer.story.hairDef))
+					{
+						//	HairGotFiltered = true;
+						return;
+					}
 					H_g__MeshAt.Dewit = true;
 				}
 			}
@@ -120,12 +126,36 @@ namespace QuickFast
 		[HarmonyPatch(typeof(GenDraw), "DrawMeshNowOrLater", new[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(bool) })]
 		public static class H_g__MeshAt
 		{
+			public static void hairScale_Changed()
+			{
+				scalers.Clear();
+				if (Find.CurrentMap != null)
+				{
+					foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
+					{
+						p.apparel.Notify_ApparelChanged();
+					}
+				}
+			}
+
+			public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
+
 			public static bool Dewit = false;
 			private static void Prefix(ref Mesh mesh)
 			{
 				if (Dewit)
 				{
-					mesh = MeshHead(mesh, Settings.hairMeshScale);
+					try
+					{
+						mesh = scalers[mesh];
+					}
+					catch
+					{
+						scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
+						mesh = scalers[mesh];
+					}
+
+					//mesh = H_RenderPawn.MeshScaler() MeshHead(mesh, Settings.hairMeshScale);
 				}
 			}
 		}
@@ -458,176 +488,165 @@ namespace QuickFast
 		}
 	}
 
-	public static class H_RenderPawn
-	{
-		public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
+	//public static class H_RenderPawn
+	//{
 
-		//	public static bool HairGotFiltered;
+	//	public static bool HairGotFiltered;
 
-		public static void hairScale_Changed()
-		{
-			scalers.Clear();
-			if (Find.CurrentMap != null)
-			{
-				foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
-				{
-					p.apparel.Notify_ApparelChanged();
-				}
-			}
-		}
 
-		public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
-		{
-			//HairGotFiltered = false;
-			if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
-			{
-				//	HairGotFiltered = true;
-				return mesh;
-			}
 
-			try
-			{
-				return scalers[mesh];
-			}
-			catch
-			{
-				scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
-				return scalers[mesh];
-			}
-		}
+	//public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
+	//{
+	//	//HairGotFiltered = false;
+	//	if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
+	//	{
+	//		//	HairGotFiltered = true;
+	//		return mesh;
+	//	}
 
-		//	public static bool ShouldRenderHair(bool HatDrawn)
-		//	{
-		//		if (HatDrawn is true)
-		//		{
-		//			if (HairGotFiltered)
-		//			{
-		//				return true;
-		//			}
-		//			else
-		//			{
-		//				return false;
-		//			}
-		//		}
+	//	try
+	//	{
+	//		return scalers[mesh];
+	//	}
+	//	catch
+	//	{
+	//		scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
+	//		return scalers[mesh];
+	//	}
+	//}
 
-		//		return false;
-		//	}
+	//	public static bool ShouldRenderHair(bool HatDrawn)
+	//	{
+	//		if (HatDrawn is true)
+	//		{
+	//			if (HairGotFiltered)
+	//			{
+	//				return true;
+	//			}
+	//			else
+	//			{
+	//				return false;
+	//			}
+	//		}
 
-		//	public static Vector3 offset(Vector3 vec)
-		//	{
-		//		if (HairGotFiltered)
-		//		{
-		//			HairGotFiltered = false;
-		//			return vec;
-		//		}
+	//		return false;
+	//	}
 
-		//		vec.y += -0.0036f;
-		//		return vec;
-		//	}
+	//	public static Vector3 offset(Vector3 vec)
+	//	{
+	//		if (HairGotFiltered)
+	//		{
+	//			HairGotFiltered = false;
+	//			return vec;
+	//		}
 
-		//	public static bool oploc(this CodeInstruction obj, OpCode oc, int ind)
-		//	{
-		//		return obj.opcode == oc && obj.operand is LocalBuilder i && i.LocalIndex == ind;
-		//	}
+	//		vec.y += -0.0036f;
+	//		return vec;
+	//	}
 
-		//	public static bool loc(this CodeInstruction obj, int ind)
-		//	{
-		//		return obj.operand is LocalBuilder i && i.LocalIndex == ind;
-		//	}
+	//	public static bool oploc(this CodeInstruction obj, OpCode oc, int ind)
+	//	{
+	//		return obj.opcode == oc && obj.operand is LocalBuilder i && i.LocalIndex == ind;
+	//	}
 
-		//	public static bool op(this CodeInstruction obj, OpCode oc)
-		//	{
-		//		return obj.opcode == oc;
-		//	}
+	//	public static bool loc(this CodeInstruction obj, int ind)
+	//	{
+	//		return obj.operand is LocalBuilder i && i.LocalIndex == ind;
+	//	}
 
-		//	public static IEnumerable<CodeInstruction> Transpilerino(IEnumerable<CodeInstruction> instructions)
-		//	{
-		//		var f_shouldrender = false;
-		//		var f_offset = false;
-		//		var f_scaler = false;
-		//		var ins_l = instructions.ToList();
+	//	public static bool op(this CodeInstruction obj, OpCode oc)
+	//	{
+	//		return obj.opcode == oc;
+	//	}
 
-		//		//check its possible before bothering
+	//	public static IEnumerable<CodeInstruction> Transpilerino(IEnumerable<CodeInstruction> instructions)
+	//	{
+	//		var f_shouldrender = false;
+	//		var f_offset = false;
+	//		var f_scaler = false;
+	//		var ins_l = instructions.ToList();
 
-		//		for (var i = 0; i < ins_l.Count - 1; i++)
-		//		{
-		//			var ins = ins_l[i];
-		//			if (ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
-		//			{
-		//				f_scaler = true;
-		//			}
-		//			else if (ins.oploc(OpCodes.Ldloc_S, 14))
-		//			{
-		//				f_shouldrender = true;
-		//			}
-		//			else if (ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
-		//			{
-		//				f_offset = true;
-		//			}
-		//		}
+	//		//check its possible before bothering
 
-		//		if (f_scaler is false)
-		//		{
-		//			Log.Warning("Failed inject m_MeshScaler - hair under hats wont work F");
-		//		}
+	//		for (var i = 0; i < ins_l.Count - 1; i++)
+	//		{
+	//			var ins = ins_l[i];
+	//			if (ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
+	//			{
+	//				f_scaler = true;
+	//			}
+	//			else if (ins.oploc(OpCodes.Ldloc_S, 14))
+	//			{
+	//				f_shouldrender = true;
+	//			}
+	//			else if (ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
+	//			{
+	//				f_offset = true;
+	//			}
+	//		}
 
-		//		if (f_shouldrender is false)
-		//		{
-		//			Log.Warning("Failed inject HairGotFiltered - hair under hats wont work F");
-		//		}
+	//		if (f_scaler is false)
+	//		{
+	//			Log.Warning("Failed inject m_MeshScaler - hair under hats wont work F");
+	//		}
 
-		//		if (f_offset is false)
-		//		{
-		//			Log.Warning("Failed inject m_offset - hair under hats wont work F");
-		//		}
+	//		if (f_shouldrender is false)
+	//		{
+	//			Log.Warning("Failed inject HairGotFiltered - hair under hats wont work F");
+	//		}
 
-		//		if (!f_shouldrender || !f_offset || !f_scaler)
-		//		{
-		//			foreach (var codeInstruction in ins_l) yield return codeInstruction;
-		//		}
-		//		else
-		//		{
-		//			f_shouldrender = false;
-		//			f_offset = false;
-		//			f_scaler = false;
+	//		if (f_offset is false)
+	//		{
+	//			Log.Warning("Failed inject m_offset - hair under hats wont work F");
+	//		}
 
-		//			for (var i = 0; i < ins_l.Count; i++)
-		//			{
-		//				var ins = ins_l[i];
-		//				if (f_scaler is false && ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
-		//				{
-		//					f_scaler = true;
-		//					yield return ins;
-		//					yield return new CodeInstruction(OpCodes.Ldarg_0);
-		//					yield return new CodeInstruction(OpCodes.Ldloc_S, 15);
-		//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
-		//					yield return new CodeInstruction(OpCodes.Stloc_S, 15);
-		//				}
-		//				else if (f_shouldrender is false && ins.oploc(OpCodes.Ldloc_S, 14))
-		//				{
-		//					yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
-		//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
-		//					// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
-		//					yield return new CodeInstruction(OpCodes.Stloc_S, 14);
-		//					yield return ins;
-		//					f_shouldrender = true;
-		//				}
-		//				else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
-		//				{
-		//					f_offset = true;
-		//					yield return ins;
-		//					yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
-		//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(offset)));
-		//					yield return new CodeInstruction(OpCodes.Stloc_S, 13);
-		//				}
-		//				else
-		//				{
-		//					yield return ins;
-		//				}
-		//			}
-		//		}
-		//	}
-	}
+	//		if (!f_shouldrender || !f_offset || !f_scaler)
+	//		{
+	//			foreach (var codeInstruction in ins_l) yield return codeInstruction;
+	//		}
+	//		else
+	//		{
+	//			f_shouldrender = false;
+	//			f_offset = false;
+	//			f_scaler = false;
+
+	//			for (var i = 0; i < ins_l.Count; i++)
+	//			{
+	//				var ins = ins_l[i];
+	//				if (f_scaler is false && ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
+	//				{
+	//					f_scaler = true;
+	//					yield return ins;
+	//					yield return new CodeInstruction(OpCodes.Ldarg_0);
+	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 15);
+	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
+	//					yield return new CodeInstruction(OpCodes.Stloc_S, 15);
+	//				}
+	//				else if (f_shouldrender is false && ins.oploc(OpCodes.Ldloc_S, 14))
+	//				{
+	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
+	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
+	//					// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
+	//					yield return new CodeInstruction(OpCodes.Stloc_S, 14);
+	//					yield return ins;
+	//					f_shouldrender = true;
+	//				}
+	//				else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
+	//				{
+	//					f_offset = true;
+	//					yield return ins;
+	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
+	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(offset)));
+	//					yield return new CodeInstruction(OpCodes.Stloc_S, 13);
+	//				}
+	//				else
+	//				{
+	//					yield return ins;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 
 	[HarmonyPatch(typeof(Pawn_DraftController))]

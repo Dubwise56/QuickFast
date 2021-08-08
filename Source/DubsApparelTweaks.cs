@@ -190,14 +190,14 @@ namespace QuickFast
 				if (tamw != (decimal)hairMeshScale)
 				{
 					hairMeshScale = (float)tamw;
-					H_RenderPawn.hairScale_Changed();
+					bs.H_g__MeshAt.hairScale_Changed();
 				}
 
 				if (lis.ButtonText("HairScaleReset".Translate()))
 				{
 					//  hairScaleNarrow = 1.4f;
 					hairMeshScale = 1.1f;
-					H_RenderPawn.hairScale_Changed();
+					bs.H_g__MeshAt.hairScale_Changed();
 				}
 
 
