@@ -27,8 +27,9 @@
   <Narrow_Width>Narrow Width</Narrow_Width>
   <Hair_visibility>Hair visibility</Hair_visibility>
   <HairScaleReset>Reset</HairScaleReset>
-  <Hair_Filter_Remove>Removed {0} from hair filter</Hair_Filter_Remove>
-  <Hair_Filter_Add>Added {0} to hair filter</Hair_Filter_Add>
-  <Hat_Filter_Remove>Removed {0} from hat filter</Hat_Filter_Remove>
-  <Hat_Filter_Add>Added {0} to hat filter</Hat_Filter_Add>
+  <Hair_Filter_Remove>{0} can now be hidden under hats</Hair_Filter_Remove>
+  <Hair_Filter_Add>{0} always hidden under hats</Hair_Filter_Add>
+  <Hat_Filter_Remove>{0} can now be hidden while indoors or undrafted</Hat_Filter_Remove>
+  <Hat_Filter_Add>{0} always visible</Hat_Filter_Add>
+  
 </LanguageData>

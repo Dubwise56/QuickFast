@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Windows.Forms;
 
 using HarmonyLib;
 
@@ -17,35 +18,146 @@ namespace QuickFast
 {
 
 
+
 	[StaticConstructorOnStartup]
 	public static class bs
 	{
-		[HarmonyPatch(typeof(PawnCacheRenderer), nameof(PawnCacheRenderer.RenderPawn))]
-		public static class H_PawnCacheRendererRenderPawn
-		{
-			private static void Prefix(Pawn pawn, ref bool renderBody, ref bool renderHeadgear, ref bool renderClothes, bool portrait)
-			{
-				if (portrait)
-				{
-					return;
-				}
 
-				if (pawn.CurJob == null)
-				{
-					return;
-				}
+		//[DebugAction("Memory", "Leak test", false, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
+		//public static void LeakTesting()
+		//{
+		//	void bimleaker(Type allType)
+		//	{
+		//		if (allType.IsAbstract)
+		//		{
+		//			return;
+		//		}
 
-				if (renderBody == false && !pawn.Awake() && Settings.HatsSleeping)
-				{
-					renderHeadgear = false;
-				}
+		//		if (allType.IsGenericType)
+		//		{
+		//			return;
+		//		}
 
-				if (renderBody == true && !pawn.Position.UsesOutdoorTemperature(pawn.Map))
-				{
-					//renderHeadgear = false;
-				}
-			}
-		}
+
+		//		int counts = 0;
+
+
+		//		try
+		//		{
+		//			counts = Mesh.FindObjectsOfType(allType).Length;
+		//		}
+		//		catch (Exception e)
+		//		{
+
+		//		}
+		//		;
+		//		typepcounter.Add(allType, counts);
+		//	}
+		//	if (typepcounter == null)
+		//	{
+		//		typepcounter = new Dictionary<Type, int>();
+		//		//foreach (var allType in GenTypes.AllTypes.ToList())
+		//		//{
+		//		//	try
+		//		//	{
+		//		//		bimleaker(allType);
+		//		//	}
+		//		//	catch (Exception e)
+		//		//	{
+
+		//		//	}
+		//		//}
+
+		//		foreach (var allActiveAssembly in ModLister.AllInstalledMods)
+		//		{
+		//			foreach (var VARIABLE in allActiveAssembly.source.)
+		//			{
+
+		//			}
+		//			foreach (var type in allActiveAssembly.GetTypes())
+		//			{
+		//				bimleaker(type);
+		//			}
+		//		}
+
+		//		bimleaker(typeof(string));
+		//		bimleaker(typeof(Mesh));
+		//		bimleaker(typeof(Texture));
+		//		bimleaker(typeof(Material));
+		//		bimleaker(typeof(Texture2D));
+		//		Log.Warning(typepcounter.Count + " cached types");
+		//	}
+
+		//	var strang = "";
+
+
+		//	foreach (var allType in typepcounter.Keys.ToList())
+		//	{
+		//		int counts = 0;
+
+		//		try
+		//		{
+		//			counts = Mesh.FindObjectsOfType(allType).Length;
+		//		}
+		//		catch (Exception e)
+		//		{
+
+		//		}
+		//		;
+
+		//		if (counts > typepcounter[allType])
+		//		{
+		//			strang += $"\n+{counts - typepcounter[allType]} {allType.Name}";
+		//		}
+
+		//		try
+		//		{
+		//			typepcounter[allType] = counts;
+		//		}
+		//		catch (Exception e)
+		//		{
+		//			//typepcounter.Add(allType, counts);
+		//		}
+
+		//	}
+		//	TextEditor te = new TextEditor();
+		//	te.text = strang;
+		//	te.OnFocus();
+		//	te.Copy();
+		//	Log.Warning(strang);
+
+		//}
+
+		//public static Dictionary<Type, int> typepcounter = null;
+
+
+
+		//[HarmonyPatch(typeof(PawnCacheRenderer), nameof(PawnCacheRenderer.RenderPawn))]
+		//public static class H_PawnCacheRendererRenderPawn
+		//{
+		//	private static void Prefix(Pawn pawn, ref bool renderBody, ref bool renderHeadgear, ref bool renderClothes, bool portrait)
+		//	{
+		//		if (portrait)
+		//		{
+		//			return;
+		//		}
+
+		//		if (pawn.CurJob == null)
+		//		{
+		//			return;
+		//		}
+
+		//		if (renderBody == false && !pawn.Awake() && Settings.HatsSleeping)
+		//		{
+		//			renderHeadgear = false;
+		//		}
+
+		//		if (renderBody == true && !pawn.Position.UsesOutdoorTemperature(pawn.Map))
+		//		{
+		//			//renderHeadgear = false;
+		//		}
+		//	}
+		//}
 
 		//[HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.ShellFullyCoversHead))]
 		//public static class H_ShellFullyCoversHead
@@ -63,116 +175,123 @@ namespace QuickFast
 		//	}
 		//}
 
-		[HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.DrawHeadHair))]
-		public static class H_DrawHeadHair
-		{
-			private static void Prefix(PawnRenderer __instance, Vector3 rootLoc, Vector3 headOffset, float angle, Rot4 bodyFacing, Rot4 headFacing, RotDrawMode bodyDrawType, PawnRenderFlags flags)
-			{
-				if (!Settings.ShowHairUnderHats)
-				{
-					return;
-				}
+		//[HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.DrawHeadHair))]
+		//public static class H_DrawHeadHair
+		//{
+		//	private static void Prefix(PawnRenderer __instance, Vector3 rootLoc, Vector3 headOffset, float angle, Rot4 bodyFacing, Rot4 headFacing, RotDrawMode bodyDrawType, PawnRenderFlags flags)
+		//	{
+		//		if (!Settings.ShowHairUnderHats)
+		//		{
+		//			return;
+		//		}
 
 
-				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
-				if (flag11)
-				{
-					if (Settings.hairfilter.Contains(__instance.pawn.story.hairDef))
-					{
-						return;
-					}
+		//		bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
+		//		if (flag11)
+		//		{
+		//			if (Settings.hairfilter.Contains(__instance.pawn.story.hairDef))
+		//			{
+		//				return;
+		//			}
 
-					if (__instance.ShellFullyCoversHead(flags))
-					{
-						return;
-					}
+		//			if (__instance.ShellFullyCoversHead(flags))
+		//			{
+		//				return;
+		//			}
 
-					Vector3 vector = rootLoc + headOffset;
-					vector.y += 0.0289575271f;
-					Quaternion quat = Quaternion.AngleAxis(angle, Vector3.up);
-					Mesh mesh4 = __instance.graphics.HairMeshSet.MeshAt(headFacing);
-					Material material4 = __instance.graphics.HairMatAt(headFacing, flags.FlagSet(PawnRenderFlags.Portrait), flags.FlagSet(PawnRenderFlags.Cache));
-					bool flag12 = material4 != null;
-					if (flag12)
-					{
-						GenDraw.DrawMeshNowOrLater(mesh4, vector, quat, material4, flags.FlagSet(PawnRenderFlags.DrawNow));
-					}
-				}
-			}
-		}
+		//			Vector3 vector = rootLoc + headOffset;
+		//			vector.y += 0.0289575271f;
+		//			Quaternion quat = Quaternion.AngleAxis(angle, Vector3.up);
+		//			Mesh mesh4 = __instance.graphics.HairMeshSet.MeshAt(headFacing);
+		//			Material material4 = __instance.graphics.HairMatAt(headFacing, flags.FlagSet(PawnRenderFlags.Portrait), flags.FlagSet(PawnRenderFlags.Cache));
+		//			bool flag12 = material4 != null;
+		//			if (flag12)
+		//			{
+		//				GenDraw.DrawMeshNowOrLater(mesh4, vector, quat, material4, flags.FlagSet(PawnRenderFlags.DrawNow));
+		//			}
+		//		}
+		//	}
+		//}
 
-		[HarmonyPatch(typeof(PawnRenderer), "<DrawHeadHair>g__DrawApparel|39_0")]
-		public static class H_g__DrawApparel
-		{
-			private static void Prefix(ApparelGraphicRecord apparelRecord)
-			{
-				if (Settings.ShowHairUnderHats && Math.Abs(Settings.hairMeshScale) > 0.001f)
-				{
-					if (Settings.hairfilter.Contains(apparelRecord.sourceApparel.Wearer.story.hairDef))
-					{
-						//	HairGotFiltered = true;
-						return;
-					}
-					H_g__MeshAt.Dewit = true;
-				}
-			}
+		//[HarmonyPatch(typeof(PawnRenderer), "<DrawHeadHair>g__DrawApparel|39_0")]
+		//public static class H_g__DrawApparel
+		//{
+		//	private static void Prefix(ApparelGraphicRecord apparelRecord)
+		//	{
+		//		if (Settings.ShowHairUnderHats && Math.Abs(Settings.hairMeshScale) > 0.001f)
+		//		{
+		//			if (Settings.hairfilter.Contains(apparelRecord.sourceApparel.Wearer.story.hairDef))
+		//			{
+		//				//	HairGotFiltered = true;
+		//				return;
+		//			}
+		//			H_g__MeshAt.Dewit = true;
+		//		}
+		//	}
 
-			private static void Postfix(ApparelGraphicRecord apparelRecord)
-			{
-				H_g__MeshAt.Dewit = false;
-			}
-		}
+		//	private static void Postfix(ApparelGraphicRecord apparelRecord)
+		//	{
+		//		H_g__MeshAt.Dewit = false;
+		//	}
+		//}
 
-		[HarmonyPatch(typeof(GenDraw), "DrawMeshNowOrLater", new[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(bool) })]
-		public static class H_g__MeshAt
-		{
-			public static void hairScale_Changed()
-			{
-				scalers.Clear();
-				if (Find.CurrentMap != null)
-				{
-					foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
-					{
-						p.apparel.Notify_ApparelChanged();
-					}
-				}
-			}
+		//[HarmonyPatch(typeof(GenDraw), "DrawMeshNowOrLater", new[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(bool) })]
+		//public static class H_g__MeshAt
+		//{
+		//	public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
 
-			public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
+			//	public static bool Dewit = false;
+			//	private static void Prefix(ref Mesh mesh)
+			//	{
+			//		if (Dewit)
+			//		{
+			//			try
+			//			{
+			//				mesh = scalers[mesh];
+			//			}
+			//			catch
+			//			{
+			//				scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
+			//				mesh = scalers[mesh];
+			//			}
 
-			public static bool Dewit = false;
-			private static void Prefix(ref Mesh mesh)
-			{
-				if (Dewit)
-				{
-					try
-					{
-						mesh = scalers[mesh];
-					}
-					catch
-					{
-						scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
-						mesh = scalers[mesh];
-					}
+			//			//mesh = H_RenderPawn.MeshScaler() MeshHead(mesh, Settings.hairMeshScale);
+			//		}
 
-					//mesh = H_RenderPawn.MeshScaler() MeshHead(mesh, Settings.hairMeshScale);
-				}
-			}
-		}
+			//		H_g__MeshAt.Dewit = false;
+			//	}
+		//}
 
 		public static Harmony harmony;
 
 		public static ApparelLayerDef MiddleHead;
 
-		//private static readonly MethodInfo RenderPawnInternal = AccessTools.Method(typeof(PawnRenderer), nameof(PawnRenderer.RenderPawnInternal));
+		private static readonly MethodInfo DrawHeadHair = AccessTools.Method(typeof(PawnRenderer), nameof(PawnRenderer.DrawHeadHair));
+		private static readonly MethodInfo g__DrawApparel = AccessTools.Method(typeof(PawnRenderer), "<DrawHeadHair>g__DrawApparel|39_0");
 
-		//private static readonly HarmonyMethod trans = new HarmonyMethod(typeof(H_RenderPawn).GetMethod(nameof(H_RenderPawn.Transpilerino)));
+
+		private static readonly HarmonyMethod DrawHeadHairTranspiler = new HarmonyMethod(typeof(H_RenderPawn).GetMethod(nameof(H_RenderPawn.DrawHeadHairTranspiler)));
+		private static readonly HarmonyMethod DrawHeadgearTranspiler = new HarmonyMethod(typeof(H_RenderPawn).GetMethod(nameof(H_RenderPawn.DrawHeadgearTranspiler)));
 
 		public static readonly string harmonyID = "Quickfast";
 
 
+		public static void hairScale_Changed()
+		{
+			H_RenderPawn.scalers.Clear();
+			if (Find.CurrentMap != null)
+			{
+				foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
+				{
+					p.apparel.Notify_ApparelChanged();
+				}
+			}
+		}
+
 		static bs()
 		{
+
+
 
 			harmony = new Harmony(harmonyID);
 			harmony.PatchAll();
@@ -195,7 +314,7 @@ namespace QuickFast
 
 			if (Settings.ShowHairUnderHats)
 			{
-				//ApplyTrans();
+				ApplyTrans();
 			}
 
 
@@ -203,13 +322,13 @@ namespace QuickFast
 
 			MiddleHead = DefDatabase<ApparelLayerDef>.GetNamedSilentFail("MiddleHead");
 
-			//var CEdrawhair =
-			//	AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer_RenderPawnInternal:DrawHeadApparel");
+			var CEdrawhair =
+				AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer_RenderPawnInternal:DrawHeadApparel");
 
-			//if (CEdrawhair != null)
-			//{
-			//	harmony.Patch(CEdrawhair, null, new HarmonyMethod(typeof(bs).GetMethod(nameof(killme))));
-			//}
+			if (CEdrawhair != null)
+			{
+				harmony.Patch(CEdrawhair, null, new HarmonyMethod(typeof(bs).GetMethod(nameof(killme))));
+			}
 
 			//trick har so it loops the cached visible gear rather than getting all worn apparel
 			var meth = AccessTools.Method("AlienRace.HarmonyPatches:DrawAddons");
@@ -228,23 +347,25 @@ namespace QuickFast
 
 		public static ApparelLayerDef Overhead => MiddleHead ?? ApparelLayerDefOf.Overhead;
 
-		//public static void killme(ref bool hideHair)
-		//{
-		//	if (Settings.ShowHairUnderHats)
-		//	{
-		//		hideHair = H_RenderPawn.HairGotFiltered;
-		//	}
-		//}
+		public static void killme(ref bool hideHair)
+		{
+			if (Settings.ShowHairUnderHats)
+			{
+				hideHair = H_RenderPawn.HairGotFiltered;
+			}
+		}
 
 		public static void ApplyTrans()
 		{
-			//	harmony.Patch(RenderPawnInternal, transpiler: trans);
-			//  Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
+			harmony.Patch(DrawHeadHair, transpiler: DrawHeadHairTranspiler);
+			harmony.Patch(g__DrawApparel, transpiler: DrawHeadgearTranspiler);
+			//Log.Warning("Applied transpiler to RenderPawnInternal to show hair under hats and rescale hats");
 		}
 
 		public static void RemoveTrans()
 		{
-			//	harmony.Unpatch(RenderPawnInternal, HarmonyPatchType.Transpiler, harmonyID);
+			harmony.Unpatch(DrawHeadHair, HarmonyPatchType.Transpiler, harmonyID);
+			harmony.Unpatch(g__DrawApparel, HarmonyPatchType.Transpiler, harmonyID);
 		}
 
 
@@ -488,165 +609,194 @@ namespace QuickFast
 		}
 	}
 
-	//public static class H_RenderPawn
-	//{
+	public static class H_RenderPawn
+	{
 
-	//	public static bool HairGotFiltered;
+		public static bool HairGotFiltered;
+
+		public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
 
 
+		public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
+		{
+			HairGotFiltered = false;
+			if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
+			{
+				HairGotFiltered = true;
+				return mesh;
+			}
 
-	//public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
-	//{
-	//	//HairGotFiltered = false;
-	//	if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
-	//	{
-	//		//	HairGotFiltered = true;
-	//		return mesh;
-	//	}
+			try
+			{
+				return scalers[mesh];
+			}
+			catch
+			{
+				scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
+				return scalers[mesh];
+			}
+		}
 
-	//	try
-	//	{
-	//		return scalers[mesh];
-	//	}
-	//	catch
-	//	{
-	//		scalers[mesh] = bs.MeshHead(mesh, Settings.hairMeshScale);
-	//		return scalers[mesh];
-	//	}
-	//}
+		public static bool ShouldRenderHair(bool HatDrawn)
+		{
+			if (HatDrawn is true)
+			{
+				if (HairGotFiltered)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
 
-	//	public static bool ShouldRenderHair(bool HatDrawn)
-	//	{
-	//		if (HatDrawn is true)
-	//		{
-	//			if (HairGotFiltered)
-	//			{
-	//				return true;
-	//			}
-	//			else
-	//			{
-	//				return false;
-	//			}
-	//		}
+			return false;
+		}
 
-	//		return false;
-	//	}
+		//public static Vector3 offset(Vector3 vec)
+		//{
+		//	if (HairGotFiltered)
+		//	{
+		//		HairGotFiltered = false;
+		//		return vec;
+		//	}
 
-	//	public static Vector3 offset(Vector3 vec)
-	//	{
-	//		if (HairGotFiltered)
-	//		{
-	//			HairGotFiltered = false;
-	//			return vec;
-	//		}
+		//	vec.y += -0.0036f;
+		//	return vec;
+		//}
 
-	//		vec.y += -0.0036f;
-	//		return vec;
-	//	}
+		public static bool oploc(this CodeInstruction obj, OpCode oc, int ind)
+		{
+			return obj.opcode == oc && obj.operand is LocalBuilder i && i.LocalIndex == ind;
+		}
 
-	//	public static bool oploc(this CodeInstruction obj, OpCode oc, int ind)
-	//	{
-	//		return obj.opcode == oc && obj.operand is LocalBuilder i && i.LocalIndex == ind;
-	//	}
+		public static bool loc(this CodeInstruction obj, int ind)
+		{
+			return obj.operand is LocalBuilder i && i.LocalIndex == ind;
+		}
 
-	//	public static bool loc(this CodeInstruction obj, int ind)
-	//	{
-	//		return obj.operand is LocalBuilder i && i.LocalIndex == ind;
-	//	}
+		public static bool op(this CodeInstruction obj, OpCode oc)
+		{
+			return obj.opcode == oc;
+		}
 
-	//	public static bool op(this CodeInstruction obj, OpCode oc)
-	//	{
-	//		return obj.opcode == oc;
-	//	}
+		public static IEnumerable<CodeInstruction> DrawHeadgearTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var f_scaler = false;
+			var ins_l = instructions.ToList();
 
-	//	public static IEnumerable<CodeInstruction> Transpilerino(IEnumerable<CodeInstruction> instructions)
-	//	{
-	//		var f_shouldrender = false;
-	//		var f_offset = false;
-	//		var f_scaler = false;
-	//		var ins_l = instructions.ToList();
+			for (var i = 0; i < ins_l.Count - 1; i++)
+			{
+				var ins = ins_l[i];
+				if (ins.op(OpCodes.Stloc_0) && ins_l[i + 1].op(OpCodes.Ldarg_1))
+				{
+					f_scaler = true;
+				}
+			}
 
-	//		//check its possible before bothering
+			if (f_scaler is false)
+			{
+				Log.Warning("Failed inject m_MeshScaler - hair under hats wont work F");
+			}
 
-	//		for (var i = 0; i < ins_l.Count - 1; i++)
-	//		{
-	//			var ins = ins_l[i];
-	//			if (ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
-	//			{
-	//				f_scaler = true;
-	//			}
-	//			else if (ins.oploc(OpCodes.Ldloc_S, 14))
-	//			{
-	//				f_shouldrender = true;
-	//			}
-	//			else if (ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
-	//			{
-	//				f_offset = true;
-	//			}
-	//		}
+			if (!f_scaler)
+			{
+				foreach (var codeInstruction in ins_l) yield return codeInstruction;
+			}
+			else
+			{
+				f_scaler = false;
+				for (var i = 0; i < ins_l.Count; i++)
+				{
+					var ins = ins_l[i];
+					if (f_scaler is false && ins.op(OpCodes.Stloc_0) && ins_l[i + 1].op(OpCodes.Ldarg_1))
+					{
+						f_scaler = true;
+						yield return ins;
+						yield return new CodeInstruction(OpCodes.Ldarg_0);
+						yield return new CodeInstruction(OpCodes.Ldloc_0);
+						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
+						yield return new CodeInstruction(OpCodes.Stloc_0);
+					}
+					else
+					{
+						yield return ins;
+					}
+				}
+			}
+		}
 
-	//		if (f_scaler is false)
-	//		{
-	//			Log.Warning("Failed inject m_MeshScaler - hair under hats wont work F");
-	//		}
+		public static IEnumerable<CodeInstruction> DrawHeadHairTranspiler(IEnumerable<CodeInstruction> instructions)
+		{
+			var f_shouldrender = false;
+			//var f_offset = false;
 
-	//		if (f_shouldrender is false)
-	//		{
-	//			Log.Warning("Failed inject HairGotFiltered - hair under hats wont work F");
-	//		}
+			var ins_l = instructions.ToList();
 
-	//		if (f_offset is false)
-	//		{
-	//			Log.Warning("Failed inject m_offset - hair under hats wont work F");
-	//		}
+			//check its possible before bothering
 
-	//		if (!f_shouldrender || !f_offset || !f_scaler)
-	//		{
-	//			foreach (var codeInstruction in ins_l) yield return codeInstruction;
-	//		}
-	//		else
-	//		{
-	//			f_shouldrender = false;
-	//			f_offset = false;
-	//			f_scaler = false;
+			for (var i = 0; i < ins_l.Count - 1; i++)
+			{
+				var ins = ins_l[i];
+				if (ins.op(OpCodes.Ldloc_2))
+				{
+					f_shouldrender = true;
+				}
+				else if (ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
+				{
+					//f_offset = true;
+				}
+			}
 
-	//			for (var i = 0; i < ins_l.Count; i++)
-	//			{
-	//				var ins = ins_l[i];
-	//				if (f_scaler is false && ins.oploc(OpCodes.Stloc_S, 15) && ins_l[i + 1].op(OpCodes.Ldc_I4_0))
-	//				{
-	//					f_scaler = true;
-	//					yield return ins;
-	//					yield return new CodeInstruction(OpCodes.Ldarg_0);
-	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 15);
-	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
-	//					yield return new CodeInstruction(OpCodes.Stloc_S, 15);
-	//				}
-	//				else if (f_shouldrender is false && ins.oploc(OpCodes.Ldloc_S, 14))
-	//				{
-	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
-	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
-	//					// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
-	//					yield return new CodeInstruction(OpCodes.Stloc_S, 14);
-	//					yield return ins;
-	//					f_shouldrender = true;
-	//				}
-	//				else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
-	//				{
-	//					f_offset = true;
-	//					yield return ins;
-	//					yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
-	//					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(offset)));
-	//					yield return new CodeInstruction(OpCodes.Stloc_S, 13);
-	//				}
-	//				else
-	//				{
-	//					yield return ins;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+			if (f_shouldrender is false)
+			{
+				Log.Warning("Failed inject HairGotFiltered - hair under hats wont work F");
+			}
+
+			//if (f_offset is false)
+			//{
+			//	Log.Warning("Failed inject m_offset - hair under hats wont work F");
+			//}
+
+			if (!f_shouldrender)
+			{
+				foreach (var codeInstruction in ins_l) yield return codeInstruction;
+			}
+			else
+			{
+				f_shouldrender = false;
+				//f_offset = false;
+
+				for (var i = 0; i < ins_l.Count; i++)
+				{
+					var ins = ins_l[i];
+
+					if (f_shouldrender is false && ins.op(OpCodes.Ldloc_2))
+					{
+						yield return new CodeInstruction(OpCodes.Ldloc_2);
+						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
+						// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
+						yield return new CodeInstruction(OpCodes.Stloc_2);
+						yield return ins;
+						f_shouldrender = true;
+					}
+					//else if (f_offset is false && ins.oploc(OpCodes.Stloc_S, 20) && ins_l[i + 1].oploc(OpCodes.Ldloc_S, 13))
+					//{
+					//	f_offset = true;
+					//	yield return ins;
+					//	yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
+					//	yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(offset)));
+					//	yield return new CodeInstruction(OpCodes.Stloc_S, 13);
+					//}
+					else
+					{
+						yield return ins;
+					}
+				}
+			}
+		}
+	}
 
 
 	[HarmonyPatch(typeof(Pawn_DraftController))]
