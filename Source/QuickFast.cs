@@ -322,12 +322,14 @@ namespace QuickFast
 
 			MiddleHead = DefDatabase<ApparelLayerDef>.GetNamedSilentFail("MiddleHead");
 
+
 			var CEdrawhair =
-				AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer_RenderPawnInternal:DrawHeadApparel");
+				AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer.Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel");
 
 			if (CEdrawhair != null)
 			{
 				harmony.Patch(CEdrawhair, null, new HarmonyMethod(typeof(bs).GetMethod(nameof(killme))));
+				Log.Warning("Apparel tweaks patched CE for hair drawing");
 			}
 
 			//trick har so it loops the cached visible gear rather than getting all worn apparel
@@ -347,11 +349,11 @@ namespace QuickFast
 
 		public static ApparelLayerDef Overhead => MiddleHead ?? ApparelLayerDefOf.Overhead;
 
-		public static void killme(ref bool hideHair)
+		public static void killme(PawnRenderer renderer, ref bool hideHair)
 		{
 			if (Settings.ShowHairUnderHats)
 			{
-				hideHair = H_RenderPawn.HairGotFiltered;
+				hideHair = Settings.hairfilter.Contains(renderer.pawn.story.hairDef);
 			}
 		}
 
@@ -612,17 +614,21 @@ namespace QuickFast
 	public static class H_RenderPawn
 	{
 
-		public static bool HairGotFiltered;
+		//public static bool HairGotFiltered;
 
 		public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
 
 
 		public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
 		{
-			HairGotFiltered = false;
+			if (!Settings.ShowHairUnderHats)
+			{
+				return mesh;
+			}
+			//HairGotFiltered = false;
 			if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
 			{
-				HairGotFiltered = true;
+				//HairGotFiltered = true;
 				return mesh;
 			}
 
@@ -637,21 +643,15 @@ namespace QuickFast
 			}
 		}
 
-		public static bool ShouldRenderHair(bool HatDrawn)
+		public static bool ShouldRenderHair(PawnRenderer pr, bool HatDrawn)
 		{
 			if (HatDrawn is true)
 			{
-				if (HairGotFiltered)
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				Log.Warning("checked ShouldRenderHair");
+				return Settings.hairfilter.Contains(pr.pawn.story.hairDef);
 			}
 
-			return false;
+			return HatDrawn;
 		}
 
 		//public static Vector3 offset(Vector3 vec)
@@ -774,6 +774,7 @@ namespace QuickFast
 
 					if (f_shouldrender is false && ins.op(OpCodes.Ldloc_2))
 					{
+						yield return new CodeInstruction(OpCodes.Ldarg_0);
 						yield return new CodeInstruction(OpCodes.Ldloc_2);
 						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
 						// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
