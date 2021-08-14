@@ -324,7 +324,7 @@ namespace QuickFast
 
 
 			var CEdrawhair =
-				AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer.Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel");
+				AccessTools.Method("CombatExtended.HarmonyCE.Harmony_PawnRenderer+Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel");
 
 			if (CEdrawhair != null)
 			{
@@ -351,7 +351,7 @@ namespace QuickFast
 
 		public static void killme(PawnRenderer renderer, ref bool hideHair)
 		{
-			if (Settings.ShowHairUnderHats)
+			if (Settings.ShowHairUnderHats && hideHair)
 			{
 				hideHair = Settings.hairfilter.Contains(renderer.pawn.story.hairDef);
 			}
@@ -647,7 +647,6 @@ namespace QuickFast
 		{
 			if (HatDrawn is true)
 			{
-				Log.Warning("checked ShouldRenderHair");
 				return Settings.hairfilter.Contains(pr.pawn.story.hairDef);
 			}
 

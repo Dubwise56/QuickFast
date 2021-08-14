@@ -25,14 +25,12 @@ namespace QuickFast
                     if (Settings.hairfilter.Contains(pawn.story.hairDef))
                     {
                         Settings.hairfilter.Remove(pawn.story.hairDef);
-                        Messages.Message("Hair_Filter_Remove".Translate(pawn.story.hairDef.defName),
-                            MessageTypeDefOf.NeutralEvent);
+                        Messages.Message("Hair_Filter_Remove".Translate(pawn.story.hairDef.defName), MessageTypeDefOf.NeutralEvent);
                     }
                     else
                     {
                         Settings.hairfilter.Add(pawn.story.hairDef);
-                        Messages.Message("Hair_Filter_Add".Translate(pawn.story.hairDef.defName),
-                            MessageTypeDefOf.NeutralEvent);
+                        Messages.Message("Hair_Filter_Add".Translate(pawn.story.hairDef.defName), MessageTypeDefOf.NeutralEvent);
                     }
                     pawn.apparel.Notify_ApparelChanged();
                 }
@@ -46,12 +44,11 @@ namespace QuickFast
                 DubsApparelTweaks.Settings.Write();
             }
 
-            if (Input.GetKeyDown(KeyCode.J))
+            if (Input.GetKeyDown(KeyCode.J)) 
             {
                 foreach (var pawn in Find.Selector.SelectedObjects.OfType<Pawn>())
                 {
-                    var hat = pawn.apparel.WornApparel.FirstOrDefault(x =>
-                        x.def.apparel.layers.Any(z => z == bs.Overhead));
+                    var hat = pawn.apparel.WornApparel.FirstOrDefault(x => x.def.apparel.layers.Any(z => z == bs.Overhead));
                     if (hat == null)
                     {
                         return;
