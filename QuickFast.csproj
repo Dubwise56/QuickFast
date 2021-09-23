@@ -77,7 +77,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\DubsApparelTweaks.cs" />
-    <Compile Include="Source\h_UIRootOnGUI.cs" />
+    <Compile Include="Source\H_HAR_Workaround.cs" />
+    <Compile Include="Source\H_RenderPawn.cs" />
+    <Compile Include="Source\H_UIRootOnGUI.cs" />
+    <Compile Include="Source\H_MiscPatches.cs" />
     <Compile Include="Source\QuickFast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
