@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
   <!--NEW-->
-  <hatFilterTip>While pawns are selected you can filter hats and hair with these key combinations\nCtrl + H to show or hide that hairstyle under hats\nCtrl + J to filter that hat style from being hidden</hatFilterTip>
+  <HatFiltersTip>Ctrl+J on a selected pawn will toggle the visibility of that hat type</HatFiltersTip>
+  <HairFiltersTip>Ctrl+H on a selected pawn will toggle the visibility of that hair type under hats</HairFiltersTip>
+  <HatHairFiltersTip>Ctrl+K on a selected pawn will toggle the visibility of that hair and hat combination</HatHairFiltersTip>
+
   <Apparel_equip_speed>Apparel equip speed</Apparel_equip_speed>
   <Change_equip_speeds>Change equip speeds</Change_equip_speeds>
   <Same_speed_for_all_apparel>Same speed for all apparel</Same_speed_for_all_apparel>
@@ -11,8 +14,8 @@
 
   <Hide_hats_when_sleeping>Hide hats when sleeping</Hide_hats_when_sleeping>
 
-	<IndoorHidingMode>Hide clothing indoors</IndoorHidingMode>
-	<DraftedHidingMode>Show clothing only when drafted</DraftedHidingMode>
+	<IndoorHidingMode>Hide apparel indoors</IndoorHidingMode>
+	<DraftedHidingMode>Show apparel only when drafted</DraftedHidingMode>
 
   <Hide_hats_when_indoors>Hide hats</Hide_hats_when_indoors>
   <Hide_jackets_when_indoors>Hide shell layers</Hide_jackets_when_indoors>
@@ -31,5 +34,7 @@
   <Hair_Filter_Add>{0} always hidden under hats</Hair_Filter_Add>
   <Hat_Filter_Remove>{0} can now be hidden while indoors or undrafted</Hat_Filter_Remove>
   <Hat_Filter_Add>{0} always visible</Hat_Filter_Add>
+  <HairHat_Filter_Add>{0} always hidden under {1}</HairHat_Filter_Add>
+  <HairHat_Filter_Remove>{0} now visible under {1}</HairHat_Filter_Remove>
   
 </LanguageData>
