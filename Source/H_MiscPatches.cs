@@ -91,14 +91,15 @@ namespace QuickFast
 					{
 						if (Settings.LayerVis.Contains(apparelLayerDef.defName))
 						{
+							if (Settings.hatfilter.Contains(x.sourceApparel.def))
+							{
+								return false;
+							}
 							return true;
 						}
 					}
 
-					if (Settings.hatfilter.Contains(x.sourceApparel.def))
-					{
-						return true;
-					}
+
 
 					return false;
 				}

@@ -111,6 +111,8 @@ namespace QuickFast
 						Settings.hatfilter.Add(hat.def);
 						Messages.Message("Hat_Filter_Add".Translate(hat.def.defName), MessageTypeDefOf.NeutralEvent);
 					}
+
+					pawn.apparel.Notify_ApparelChanged();
 				}
 
 				Settings.HatDefToStrings = new List<string>();
@@ -119,7 +121,7 @@ namespace QuickFast
 					Settings.HatDefToStrings.Add(s.defName);
 				}
 
-
+				
 				DubsApparelTweaks.Settings.Write();
 			}
 		}
