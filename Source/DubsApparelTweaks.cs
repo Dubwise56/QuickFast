@@ -352,7 +352,7 @@ namespace QuickFast
 			{
 				foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
 				{
-					p.apparel.Notify_ApparelChanged();
+					p.apparel?.Notify_ApparelChanged();
 					H_MiscPatches.PatherCheck(p, p.pather.nextCell, p.pather.lastCell, true);
 				}
 			}
