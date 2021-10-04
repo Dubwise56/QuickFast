@@ -313,13 +313,20 @@ namespace QuickFast
 		{
 			private static bool Prepare()
 			{
-				if (AccessTools.Method("Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel") == null)
+				return true;
+
+				if (AccessTools.Method("Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel") != null)
 				{
-					return false;
+					Log.Warning("Apparel tweaks detected CE - Applying hair drawing patch");
+					return true;
 				}
 
-				Log.Warning("Apparel tweaks detected CE - Applying hair drawing patch");
-				return true;
+				if (Settings.AltHairRenderMode)
+				{
+					return true;
+				}
+				
+				return false;
 			}
 
 
@@ -330,6 +337,10 @@ namespace QuickFast
 					return;
 				}
 
+				if (!Settings.AltHairRenderMode)
+				{
+					return;
+				}
 
 				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
 				if (flag11)

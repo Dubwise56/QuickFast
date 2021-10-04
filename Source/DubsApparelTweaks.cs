@@ -48,6 +48,8 @@ namespace QuickFast
 		public static bool ShowHairUnderHats;
 		public static bool ChangeEquipSpeed = true;
 
+		public static bool AltHairRenderMode = false;
+
 		public static HashSet<string> LayerVis = new HashSet<string>();
 
 		public class HairHatSet : IExposable
@@ -223,6 +225,10 @@ namespace QuickFast
 
 			if (ShowHairUnderHats)
 			{
+
+				lis.CheckboxLabeled("Alternate hair draw mode", ref AltHairRenderMode);
+
+
 				lis.LabelDouble("HatScaling".Translate(), $"{hairMeshScale}");
 				var tamw = decimal.Round((decimal)lis.Slider(hairMeshScale, 0.9f, 1.2f), 3);
 				if (tamw != (decimal)hairMeshScale)
