@@ -226,7 +226,7 @@ namespace QuickFast
 			if (ShowHairUnderHats)
 			{
 
-				lis.CheckboxLabeled("Alternate hair draw mode", ref AltHairRenderMode);
+				lis.CheckboxLabeled("Alternate hair draw mode (for conflicts)", ref AltHairRenderMode);
 
 
 				lis.LabelDouble("HatScaling".Translate(), $"{hairMeshScale}");
