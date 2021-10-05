@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 
@@ -18,7 +19,7 @@ namespace QuickFast
 
 		public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
 		{
-			if (!Settings.ShowHairUnderHats)
+			if (!Settings.ShowHairUnderHats || Math.Abs(Settings.hairMeshScale - 1f) < 0.001f)
 			{
 				return mesh;
 			}

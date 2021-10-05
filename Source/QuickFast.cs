@@ -358,6 +358,7 @@ namespace QuickFast
 
 					Vector3 vector = rootLoc + headOffset;
 					vector.y += 0.0289575271f;
+					vector.y += Settings.AltHairRenderLayer;
 					Quaternion quat = Quaternion.AngleAxis(angle, Vector3.up);
 					Mesh mesh4 = __instance.graphics.HairMeshSet.MeshAt(headFacing);
 					Material material4 = __instance.graphics.HairMatAt(headFacing, flags.FlagSet(PawnRenderFlags.Portrait), flags.FlagSet(PawnRenderFlags.Cache));

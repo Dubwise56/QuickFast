@@ -49,6 +49,7 @@ namespace QuickFast
 		public static bool ChangeEquipSpeed = true;
 
 		public static bool AltHairRenderMode = false;
+		public static float AltHairRenderLayer = 0f;
 
 		public static HashSet<string> LayerVis = new HashSet<string>();
 
@@ -225,8 +226,16 @@ namespace QuickFast
 
 			if (ShowHairUnderHats)
 			{
-
+				
 				lis.CheckboxLabeled("Alternate hair draw mode (for conflicts)", ref AltHairRenderMode);
+
+				lis.LabelDouble("Hair layer offset", $"{AltHairRenderLayer}");
+				var tamwy = decimal.Round((decimal)lis.Slider(AltHairRenderLayer, -0.1f, 0.1f), 3);
+				if (tamwy != (decimal)AltHairRenderLayer)
+				{
+					AltHairRenderLayer = (float)tamwy;
+					hairScale_Changed();
+				}
 
 
 				lis.LabelDouble("HatScaling".Translate(), $"{hairMeshScale}");
