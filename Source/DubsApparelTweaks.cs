@@ -226,8 +226,12 @@ namespace QuickFast
 
 			if (ShowHairUnderHats)
 			{
-				
+				var gilf = AltHairRenderMode;
 				lis.CheckboxLabeled("Alternate hair draw mode (for conflicts)", ref AltHairRenderMode);
+				if (gilf != AltHairRenderMode)
+				{
+					hairScale_Changed();
+				}
 
 				lis.LabelDouble("Hair layer offset", $"{AltHairRenderLayer}");
 				var tamwy = decimal.Round((decimal)lis.Slider(AltHairRenderLayer, -0.1f, 0.1f), 3);
@@ -250,6 +254,7 @@ namespace QuickFast
 				{
 					//  hairScaleNarrow = 1.4f;
 					hairMeshScale = 1.1f;
+					AltHairRenderLayer = 0;
 					hairScale_Changed();
 				}
 
@@ -376,6 +381,10 @@ namespace QuickFast
 		public override void ExposeData()
 		{
 			base.ExposeData();
+
+			Scribe_Values.Look(ref AltHairRenderMode, "AltHairRenderMode", false);
+			Scribe_Values.Look(ref AltHairRenderLayer, "AltHairRenderLayer", 0f);
+
 			Scribe_Values.Look(ref hairMeshScale, "hairMeshScale", 1.06f);
 			Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
 			Scribe_Values.Look(ref DraftedHidingMode, "DraftedHidingMode");

@@ -24,7 +24,7 @@ namespace QuickFast
 				return mesh;
 			}
 			//HairGotFiltered = false;
-			if (!ShouldRenderHair(pr, true))
+			if (!ShouldRenderHair(pr))
 			{
 				//HairGotFiltered = true;
 				return mesh;
@@ -41,38 +41,44 @@ namespace QuickFast
 			}
 		}
 
-		public static bool ShouldRenderHair(PawnRenderer pr, bool HatDrawn)
+
+		public static bool InjectedHairToggly(PawnRenderer pr, bool HatDrawn)
 		{
+			if (Settings.AltHairRenderMode || bs.CEGetHeadMesh != null) return HatDrawn;
+
 			if (HatDrawn is true)
 			{
-				if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
-				{
-					return false;
-				}
-
-				var ag = pr.graphics.apparelGraphics;
-				var hairset = Settings.HatHairCombo.FirstOrDefault(x => x.Hair == pr.pawn.story.hairDef.defName);
-				if (hairset != null && hairset.Hats.Count > 0)
-				{
-					for (int k = 0; k < ag.Count; k++)
-					{
-						if (ag[k].sourceApparel.def.apparel.LastLayer == bs.Overhead)
-						{
-							//HatDrawn;
-							if (hairset.Hats.Contains(ag[k].sourceApparel.def.defName))
-							{
-								return false;
-							}
-						}
-					}
-				}
-
-
-				//Log.Warning("checked ShouldRenderHair");
-				return true;
+				return !ShouldRenderHair(pr);
 			}
 
 			return false;
+		}
+
+		public static bool ShouldRenderHair(PawnRenderer pr)
+		{
+			if (Settings.hairfilter.Contains(pr.pawn.story.hairDef))
+			{
+				return false;
+			}
+
+			var ag = pr.graphics.apparelGraphics;
+			var hairset = Settings.HatHairCombo.FirstOrDefault(x => x.Hair == pr.pawn.story.hairDef.defName);
+			if (hairset != null && hairset.Hats.Count > 0)
+			{
+				for (int k = 0; k < ag.Count; k++)
+				{
+					if (ag[k].sourceApparel.def.apparel.LastLayer == bs.Overhead)
+					{
+						//HatDrawn;
+						if (hairset.Hats.Contains(ag[k].sourceApparel.def.defName))
+						{
+							return false;
+						}
+					}
+				}
+			}
+
+			return true;
 		}
 
 		//public static Vector3 offset(Vector3 vec)
@@ -197,7 +203,7 @@ namespace QuickFast
 					{
 						yield return new CodeInstruction(OpCodes.Ldarg_0);
 						yield return new CodeInstruction(OpCodes.Ldloc_2);
-						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(ShouldRenderHair)));
+						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(InjectedHairToggly)));
 						// yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(H_RenderPawn), nameof(HairGotFiltered)));
 						yield return new CodeInstruction(OpCodes.Stloc_2);
 						yield return ins;

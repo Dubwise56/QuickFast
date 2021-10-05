@@ -185,6 +185,8 @@ namespace QuickFast
 
 		public static MethodInfo CEdrawhair = null;
 
+		public static MethodInfo CEGetHeadMesh = null;
+
 		static bs()
 		{
 			harmony = new Harmony(harmonyID);
@@ -219,7 +221,7 @@ namespace QuickFast
 
 
 			//CEdrawhair = AccessTools.Method("Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel");
-			var CEGetHeadMesh = AccessTools.Method("Harmony_PawnRenderer:GetHeadMesh");
+			CEGetHeadMesh = AccessTools.Method("Harmony_PawnRenderer:GetHeadMesh");
 
 			if (CEGetHeadMesh != null)
 			{
@@ -228,8 +230,8 @@ namespace QuickFast
 
 			//if (CEdrawhair != null)
 			//{
-				//harmony.Patch(CEdrawhair, null, new HarmonyMethod(typeof(bs).GetMethod(nameof(killme))));
-		//	}
+			//harmony.Patch(CEdrawhair, null, new HarmonyMethod(typeof(bs).GetMethod(nameof(killme))));
+			//	}
 
 			//trick har so it loops the cached visible gear rather than getting all worn apparel
 			var meth = AccessTools.Method("AlienRace.HarmonyPatches:DrawAddons");
@@ -311,23 +313,23 @@ namespace QuickFast
 		[HarmonyPatch(typeof(PawnRenderer), nameof(PawnRenderer.DrawHeadHair))]
 		public static class H_DrawHeadHair
 		{
-			private static bool Prepare()
-			{
-				return true;
+			//private static bool Prepare()
+			//{
+			//	return true;
 
-				if (AccessTools.Method("Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel") != null)
-				{
-					Log.Warning("Apparel tweaks detected CE - Applying hair drawing patch");
-					return true;
-				}
+			//	if (AccessTools.Method("Harmony_PawnRenderer_DrawHeadHair:DrawHeadApparel") != null)
+			//	{
+			//		Log.Warning("Apparel tweaks detected CE - Applying hair drawing patch");
+			//		return true;
+			//	}
 
-				if (Settings.AltHairRenderMode)
-				{
-					return true;
-				}
-				
-				return false;
-			}
+			//	if (Settings.AltHairRenderMode)
+			//	{
+			//		return true;
+			//	}
+
+			//	return false;
+			//}
 
 
 			private static void Prefix(PawnRenderer __instance, Vector3 rootLoc, Vector3 headOffset, float angle, Rot4 bodyFacing, Rot4 headFacing, RotDrawMode bodyDrawType, PawnRenderFlags flags)
@@ -337,37 +339,33 @@ namespace QuickFast
 					return;
 				}
 
-				if (!Settings.AltHairRenderMode)
+				if (!Settings.AltHairRenderMode && CEGetHeadMesh == null) return;
+
+				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
+				if (!flag11) return;
+
+				if (!H_RenderPawn.ShouldRenderHair(__instance))
 				{
 					return;
 				}
 
-				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
-				if (flag11)
+				if (__instance.ShellFullyCoversHead(flags))
 				{
-
-					if (!H_RenderPawn.ShouldRenderHair(__instance, true))
-					{
-						return;
-					}
-
-					if (__instance.ShellFullyCoversHead(flags))
-					{
-						return;
-					}
-
-					Vector3 vector = rootLoc + headOffset;
-					vector.y += 0.0289575271f;
-					vector.y += Settings.AltHairRenderLayer;
-					Quaternion quat = Quaternion.AngleAxis(angle, Vector3.up);
-					Mesh mesh4 = __instance.graphics.HairMeshSet.MeshAt(headFacing);
-					Material material4 = __instance.graphics.HairMatAt(headFacing, flags.FlagSet(PawnRenderFlags.Portrait), flags.FlagSet(PawnRenderFlags.Cache));
-					bool flag12 = material4 != null;
-					if (flag12)
-					{
-						GenDraw.DrawMeshNowOrLater(mesh4, vector, quat, material4, flags.FlagSet(PawnRenderFlags.DrawNow));
-					}
+					return;
 				}
+
+				var vector = rootLoc + headOffset;
+				vector.y += 0.0289575271f;
+				vector.y += Settings.AltHairRenderLayer;
+				var quat = Quaternion.AngleAxis(angle, Vector3.up);
+				var mesh4 = __instance.graphics.HairMeshSet.MeshAt(headFacing);
+				var material4 = __instance.graphics.HairMatAt(headFacing, flags.FlagSet(PawnRenderFlags.Portrait), flags.FlagSet(PawnRenderFlags.Cache));
+				if (material4 != null)
+				{
+					GenDraw.DrawMeshNowOrLater(mesh4, vector, quat, material4, flags.FlagSet(PawnRenderFlags.DrawNow));
+				}
+
+
 			}
 		}
 
