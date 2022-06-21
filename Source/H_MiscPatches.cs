@@ -53,6 +53,10 @@ namespace QuickFast
 		{
 			public static void Postfix(Pawn_DraftController __instance)
 			{
+                if (__instance.pawn.apparel == null)
+                {
+					return;
+                }
 				if (__instance.draftedInt)
 				{
 					SwitchOutdoors(__instance.pawn);
