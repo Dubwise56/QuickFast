@@ -192,8 +192,8 @@ namespace QuickFast
 			harmony = new Harmony(harmonyID);
 			harmony.PatchAll();
 
-			MethodInfo b__0 = AccessTools.Method("RimWorld.Toils_LayDown+<>c__DisplayClass3_0:<LayDown>b__0");
-			MethodInfo b__2 = AccessTools.Method("RimWorld.Toils_LayDown+<>c__DisplayClass3_0:<LayDown>b__2");
+			MethodInfo b__0 = AccessTools.Method("RimWorld.Toils_LayDown+<>c__DisplayClass6_0:<LayDown>b__0");
+			MethodInfo b__2 = AccessTools.Method("RimWorld.Toils_LayDown+<>c__DisplayClass6_0:<LayDown>b__2");
 
 			if (b__0 != null && b__2 != null)
 			{
