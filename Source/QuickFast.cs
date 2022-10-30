@@ -175,7 +175,7 @@ namespace QuickFast
 		public static ApparelLayerDef MiddleHead;
 
 		private static MethodInfo DrawHeadHair = AccessTools.Method(typeof(PawnRenderer), nameof(PawnRenderer.DrawHeadHair));
-		private static MethodInfo g__DrawApparel = AccessTools.Method(typeof(PawnRenderer), "<DrawHeadHair>g__DrawApparel|39_0");
+		private static MethodInfo g__DrawApparel = AccessTools.Method("Verse.PawnRenderer+<>c__DisplayClass54_0:<DrawHeadHair>g__DrawApparel|2");
 
 		private static HarmonyMethod DrawHeadHairTranspiler = new HarmonyMethod(typeof(H_RenderPawn).GetMethod(nameof(H_RenderPawn.DrawHeadHairTranspiler)));
 		private static HarmonyMethod DrawHeadgearTranspiler = new HarmonyMethod(typeof(H_RenderPawn).GetMethod(nameof(H_RenderPawn.DrawHeadgearTranspiler)));
