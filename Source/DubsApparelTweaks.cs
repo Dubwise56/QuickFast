@@ -49,7 +49,7 @@ namespace QuickFast
 		public static bool ChangeEquipSpeed = true;
 
 		public static bool AltHairRenderMode = false;
-		public static float AltHairRenderLayer = 0f;
+		public static float AltHairRenderLayer = 0.001f;
 
 		public static HashSet<string> LayerVis = new HashSet<string>();
 

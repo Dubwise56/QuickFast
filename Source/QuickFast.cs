@@ -341,7 +341,7 @@ namespace QuickFast
 
 				if (!Settings.AltHairRenderMode && CEGetHeadMesh == null) return;
 
-				bool flag11 = bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
+				bool flag11 = !__instance.pawn.DevelopmentalStage.Baby() && bodyDrawType != RotDrawMode.Dessicated && !flags.FlagSet(PawnRenderFlags.HeadStump);
 				if (!flag11) return;
 
 				if (!H_RenderPawn.ShouldRenderHair(__instance))
