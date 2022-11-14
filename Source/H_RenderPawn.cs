@@ -15,6 +15,9 @@ namespace QuickFast
 {
 	public static class H_RenderPawn
 	{
+		public static Type displayClassType = AccessTools.TypeByName("Verse.PawnRenderer+<>c__DisplayClass54_0");
+		public static System.Reflection.FieldInfo displayClassPrField = AccessTools.Field(displayClassType, "<>4__this");
+
 		public static Dictionary<Mesh, Mesh> scalers = new Dictionary<Mesh, Mesh>();
 
 		public static Mesh MeshScaler(PawnRenderer pr, Mesh mesh)
@@ -41,6 +44,11 @@ namespace QuickFast
 			}
 		}
 
+		public static Mesh MeshScalerDC(object pawnRendererDisplayClass, Mesh mesh)
+		{
+			var pr = (PawnRenderer) displayClassPrField.GetValue(pawnRendererDisplayClass);
+			return MeshScaler(pr, mesh);
+		}
 
 		public static bool InjectedHairToggly(PawnRenderer pr, bool HatDrawn)
 		{
@@ -143,7 +151,7 @@ namespace QuickFast
 						yield return ins;
 						yield return new CodeInstruction(OpCodes.Ldarg_0);
 						yield return new CodeInstruction(OpCodes.Ldloc_0);
-						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScaler)));
+						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(H_RenderPawn), nameof(MeshScalerDC)));
 						yield return new CodeInstruction(OpCodes.Stloc_0);
 					}
 					else
