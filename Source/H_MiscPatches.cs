@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using LudeonTK;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -159,8 +160,7 @@ namespace QuickFast
 			{
 				while (enumerator.MoveNext())
 				{
-					if (ApparelGraphicRecordGetter.TryGetGraphicApparel(enumerator.Current,
-						graphics.pawn.story.bodyType, out var item))
+					if (ApparelGraphicRecordGetter.TryGetGraphicApparel(enumerator.Current, graphics.pawn.story.bodyType, out var item))
 					{
 						graphics.apparelGraphics.Add(item);
 					}

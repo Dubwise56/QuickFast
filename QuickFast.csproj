@@ -18,7 +18,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>1.4\Assemblies\</OutputPath>
+    <OutputPath>1.6\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,12 +35,11 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Lib.Harmony.2.2.2\lib\net472\0Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Lib.Harmony.2.3.6\lib\net472\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp_publicized">
+    <Reference Include="Assembly-CSharp">
       <HintPath>..\..\RimWorldWin64_Data\Managed\publicized_assemblies\Assembly-CSharp_publicized.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -83,16 +82,6 @@
     <Compile Include="Source\H_MiscPatches.cs" />
     <Compile Include="Source\QuickFast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="1.3\Assemblies\0Harmony.dll" />
-    <Content Include="1.3\Assemblies\0Harmony.xml" />
-    <Content Include="1.3\Assemblies\QuickFast.dll" />
-    <Content Include="1.3\Languages\English\Keyed\Quickfast.xml" />
-    <Content Include="1.4\Assemblies\0Harmony.dll" />
-    <Content Include="1.4\Assemblies\0Harmony.xml" />
-    <Content Include="1.4\Assemblies\QuickFast.dll" />
-    <Content Include="1.4\Languages\English\Keyed\Quickfast.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
