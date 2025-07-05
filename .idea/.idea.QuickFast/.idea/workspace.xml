@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b087a359-87ab-46e0-973e-b3c9d8bdca46" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/H_EquipSpeed.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.QuickFast/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.QuickFast/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/About/About.xml" beforeDir="false" afterPath="$PROJECT_DIR$/About/About.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/1.6/Assemblies/Assembly-CSharp_publicized.dll" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/QuickFast.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/QuickFast.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DubsApparelTweaks.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DubsApparelTweaks.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/H_HAR_Workaround.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/H_MiscPatches.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/H_MiscPatches.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/H_RenderPawn.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/QuickFast.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/h_UIRootOnGUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/h_UIRootOnGUI.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +63,7 @@
       <option name="presentableId" value="Default" />
       <updated>1751560531939</updated>
       <workItem from="1751560533699" duration="4544000" />
-      <workItem from="1751685023813" duration="15431000" />
+      <workItem from="1751685023813" duration="15744000" />
     </task>
     <servers />
   </component>
