@@ -1,5 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b087a359-87ab-46e0-973e-b3c9d8bdca46" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/H_EquipSpeed.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.QuickFast/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.QuickFast/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/About/About.xml" beforeDir="false" afterPath="$PROJECT_DIR$/About/About.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuickFast.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/QuickFast.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DubsApparelTweaks.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DubsApparelTweaks.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/H_HAR_Workaround.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/H_MiscPatches.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/H_MiscPatches.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/H_RenderPawn.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/QuickFast.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/h_UIRootOnGUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/h_UIRootOnGUI.cs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/78f29a4eb9bd4773be28b9eaaf6c5df6ef3800/d7/a9ade35e/PawnRenderNode_Apparel.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2zN9BZthDsD9xMuctumVKeg7zlR" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RunManager">
     <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
       <option name="allowRunningInParallel" value="false" />
@@ -15,5 +62,45 @@
       <option name="useMixedMode" value="false" />
       <method v="2" />
     </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b087a359-87ab-46e0-973e-b3c9d8bdca46" name="Changes" comment="" />
+      <created>1751560531939</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1751560531939</updated>
+      <workItem from="1751560533699" duration="4544000" />
+      <workItem from="1751685023813" duration="15431000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="UnityProjectDiscoverer">
+    <option name="hasUnityReference" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

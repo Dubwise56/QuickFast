@@ -76,15 +76,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\DubsApparelTweaks.cs" />
-    <Compile Include="Source\H_HAR_Workaround.cs" />
-    <Compile Include="Source\H_RenderPawn.cs" />
+    <Compile Include="Source\H_EquipSpeed.cs" />
     <Compile Include="Source\H_UIRootOnGUI.cs" />
     <Compile Include="Source\H_MiscPatches.cs" />
-    <Compile Include="Source\QuickFast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="About\About.xml" />
+    <Content Include="About\preview.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
