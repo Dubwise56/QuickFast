@@ -16,6 +16,15 @@ namespace QuickFast.Source
         {
         }
         
+                
+        public static void ApparelChanged(Pawn pawn)
+        {
+            if (!UnityData.IsInMainThread) return;
+            pawn?.apparel?.Notify_ApparelChanged();
+            PortraitsCache.SetDirty(pawn);
+        }
+        
+        
         [HarmonyPatch(typeof(PawnRenderTree), nameof(PawnRenderTree.AdjustParms))]
         static class Patch_PawnRenderNodeWorker_Apparel_Head_ShowHair
         {
@@ -32,7 +41,7 @@ namespace QuickFast.Source
             }
         }
 
-// …inside class H_MiscPatches
+
         public static bool ShouldRenderHair(PawnDrawParms pr)
         {
             // Guard against a completely null parameter or null pawn
@@ -74,13 +83,13 @@ namespace QuickFast.Source
                 {
                     continue;
                 }
-                
+
                 if (apparel.def?.apparel?.LastLayer != DubsApparelTweaks.Overhead)
                 {
                     continue;
                 }
 
-                if (hairSet.Hats.Contains(apparel.def.defName))
+                if (apparel.def != null && hairSet.Hats.Contains(apparel.def.defName))
                 {
                     return false;
                 }
@@ -89,6 +98,7 @@ namespace QuickFast.Source
             return true;
         }
         
+
         [HarmonyPatch(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath))]
         public static class H_StartPath
         {
@@ -124,25 +134,9 @@ namespace QuickFast.Source
         {
             public static void Postfix(Pawn_DraftController __instance)
             {
-                if (__instance.pawn.apparel == null)
+                if (Settings.DraftedHidingMode)
                 {
-                    return;
-                }
-
-                if (__instance.draftedInt)
-                {
-                    SwitchOutdoors(__instance.pawn);
-                }
-                else
-                {
-                    if (Settings.DraftedHidingMode || __instance.pawn.Position.UsesOutdoorTemperature(__instance.pawn.MapHeld) is false)
-                    {
-                        SwitchIndoors(__instance.pawn);
-                    }
-                    else
-                    {
-                        SwitchOutdoors(__instance.pawn);
-                    }
+                    ApparelChanged(__instance.pawn);
                 }
             }
         }
@@ -155,7 +149,8 @@ namespace QuickFast.Source
             public static IEnumerable<Graphic> Postfix(IEnumerable<Graphic> __result, PawnRenderNode_Apparel __instance, Pawn pawn)
             {
                 var apparel = __instance.apparel;
-                if (apparel == null)
+
+                if (!pawn.Spawned || pawn.Map == null || apparel == null || !pawn.RaceProps.Humanlike)
                 {
                     // No apparel, return original result
                     foreach (var graphic in __result)
@@ -187,20 +182,20 @@ namespace QuickFast.Source
                 }
 
                 var apparel = __instance.apparel;
-                
-                if (apparel == null)
+
+                if (pawn == null || apparel == null || !pawn.Spawned || pawn.Map == null || !pawn.RaceProps.Humanlike)
                 {
                     return;
                 }
-                
+
                 if (ShouldHideApparel(pawn, apparel))
                 {
                     return;
                 }
-                
+
                 if (!apparel.def.apparel.layers.Contains(DubsApparelTweaks.Overhead))
                 {
-                    return; 
+                    return;
                 }
 
                 if (__instance.Props.overrideMeshSize != null)
@@ -222,32 +217,22 @@ namespace QuickFast.Source
 
         private static bool ShouldHideApparel(Pawn pawn, Apparel apparel)
         {
-            // Check if pawn should have apparel hidden
-            bool shouldHide = false;
-
+            // Check if pawn should have apparel hidden based on mod settings
             if (Settings.DraftedHidingMode)
             {
-                // In drafted mode, hide when not drafted
-                shouldHide = !pawn.Drafted;
+                if (pawn.Drafted)
+                {
+                   return false;
+                }
             }
             else
             {
-                // In indoor mode, hide when indoors
-                shouldHide = !pawn.Position.UsesOutdoorTemperature(pawn.MapHeld);
+                if (pawn.Position.UsesOutdoorTemperature(pawn.MapHeld))
+                {
+                    return false;
+                }
             }
-
-            // if (shouldHide == false)
-            // {
-            // 	var bed = pawn.CurrentBed();
-            // 	if (bed != null && pawn.RaceProps.Humanlike && !bed.def.building.bed_showSleeperBody)
-            // 	{
-            // 		shouldHide = true;
-            // 	}
-            // }
-
-
-            if (!shouldHide) return false;
-
+            
             // Check if this apparel matches your filter criteria
             foreach (var apparelLayerDef in apparel.def.apparel.layers)
             {
@@ -265,33 +250,11 @@ namespace QuickFast.Source
 
             return false;
         }
-
-
-        [TweakValue("DubsApparelTweaks")] public static bool TrackApparelHiding = false;
-
-        public static void SwitchIndoors(Pawn pawn)
-        {
-            if (UnityData.IsInMainThread is false) return;
-
-            pawn.apparel.Notify_ApparelChanged();
-        }
-
-        public static void SwitchOutdoors(Pawn pawn)
-        {
-            if (UnityData.IsInMainThread is false) return;
-
-            pawn.apparel.Notify_ApparelChanged();
-            //PortraitsCache.SetDirty(pawn);
-        }
-
+        
         public static void PatherCheck(Pawn pawn, IntVec3 nextCell, IntVec3 lastCell, bool startpath)
         {
-            //   if (Settings.HideHats is false && Settings.HideJackets is false) return true;
-
             if (UnityData.IsInMainThread is false) return;
-
-            // if (!pawn.RaceProps.Humanlike) return false;
-
+            
             var map = pawn.MapHeld;
 
             if (map == null) return;
@@ -304,58 +267,25 @@ namespace QuickFast.Source
 
             if (startpath)
             {
-                if (Settings.DraftedHidingMode)
-                {
-                    if (pawn.Drafted)
-                    {
-                        SwitchOutdoors(pawn);
-                    }
-                    else
-                    {
-                        SwitchIndoors(pawn);
-                    }
-                }
-                else
-                {
-                    if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
-                    {
-                        SwitchOutdoors(pawn);
-                    }
-                    else
-                    {
-                        SwitchIndoors(pawn);
-                    }
-                }
-
+                // For start path, always call ApparelChanged regardless of mode/condition
+                ApparelChanged(pawn);
                 return;
             }
-
+            
             if (Settings.DraftedHidingMode)
             {
                 return;
             }
 
-            //if (nextCell.UsesOutdoorTemperature(pawn.MapHeld))
-            //{
-            //    SwitchOutdoors(pawn);
-            //}
-            //else
-            //{
-            //    SwitchIndoors(pawn);
-            //}
+            // Check for indoor/outdoor transitions
+            var wasOutdoor = lastCell.UsesOutdoorTemperature(pawn.MapHeld);
+            var isOutdoor = nextCell.UsesOutdoorTemperature(pawn.MapHeld);
 
-            var last = lastCell.UsesOutdoorTemperature(map);
-            var next = nextCell.UsesOutdoorTemperature(map);
-
-            if (last && !next)
+            if (wasOutdoor != isOutdoor)
             {
-                SwitchIndoors(pawn);
+                ApparelChanged(pawn);
             }
 
-            if (!last && next)
-            {
-                SwitchOutdoors(pawn);
-            }
         }
     }
 }
