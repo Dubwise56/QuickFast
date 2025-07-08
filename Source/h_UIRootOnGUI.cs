@@ -25,7 +25,7 @@ namespace QuickFast.Source
                     var hat = pawn.apparel.WornApparel.FirstOrDefault(x => x.def.apparel.layers.Any(z => z == DubsApparelTweaks.Overhead));
                     if (hat == null)
                     {
-                        return;
+                        continue;
                     }
 
                     var hair = pawn.story.hairDef;
@@ -92,7 +92,7 @@ namespace QuickFast.Source
                     var hat = pawn.apparel.WornApparel.FirstOrDefault(x => x.def.apparel.layers.Any(z => z == DubsApparelTweaks.Overhead));
                     if (hat == null)
                     {
-                        return;
+                        continue;
                     }
 
                     if (Settings.hatfilter.Contains(hat.def))

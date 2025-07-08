@@ -9,14 +9,14 @@ namespace QuickFast.Source
     public class DubsApparelTweaks : Mod
     {
         public static Settings Settings;
-        
+
         public static Harmony harmony;
 
         public static ApparelLayerDef MiddleHead;
         public static ApparelLayerDef Overhead => MiddleHead ?? ApparelLayerDefOf.Overhead;
-		
-        public static readonly string harmonyID = "Quickfast";
-        
+
+        public static readonly string harmonyID = "DubsApparelTweaks.QuickFast.LittleBoy";
+
         public override void DoSettingsWindowContents(Rect canvas)
         {
             Settings.DoWindowContents(canvas);
@@ -30,37 +30,36 @@ namespace QuickFast.Source
         public DubsApparelTweaks(ModContentPack content) : base(content)
         {
             Settings = GetSettings<Settings>();
-            
+
             MiddleHead = DefDatabase<ApparelLayerDef>.GetNamedSilentFail("MiddleHead");
-			
+
             harmony = new Harmony(harmonyID);
             harmony.PatchAll();
         }
     }
+
+    public enum ApparelHidingMode
+    {
+        Never,
+        WhenNotDrafted,
+        IndoorsOrNotDrafted
+    }
+
 
     public class Settings : ModSettings
     {
         private static List<ThingDef> _hatfilter;
         private static List<HairDef> _hairfilter;
 
+        public static bool ShowHairUnderHats = true;
         public static float hairMeshScale = 1.01f;
+
+        public static bool ChangeEquipSpeed = true;
         public static float EquipModPC = 0.2f;
         public static int EquipModTicks = 10;
         public static bool FlatRate = true;
-        public static bool HideHats = true;
-        public static bool HideEquipment = true;
 
-        public static bool HideJackets = true;
-
-        //public static bool EquipmentOnlyWhileDrafted;
-        public static bool DraftedHidingMode;
-
-        //public static bool JacketsOnlyWhileDrafted;
-        public static bool ShowHairUnderHats = true;
-        public static bool ChangeEquipSpeed = true;
-
-        //public static bool AltHairRenderMode = false;
-        //public static float AltHairRenderLayer = 0.001f;
+        public static ApparelHidingMode apparelHidingMode;
 
         public static HashSet<string> LayerVis = new HashSet<string>();
 
@@ -91,7 +90,7 @@ namespace QuickFast.Source
 
         public static List<string> DefToStrings = new List<string>();
         private string buf;
-        private Listing_Standard lis;
+        private Listing_Standard Listing;
 
         public static List<ThingDef> hatfilter
         {
@@ -145,147 +144,104 @@ namespace QuickFast.Source
             }
         }
 
-
         public void DoWindowContents(Rect canvas)
         {
             var nifta = canvas;
-            lis = new Listing_Standard();
-            lis.ColumnWidth = (nifta.width - 40f) / 2f;
+            Listing = new Listing_Standard();
+            Listing.ColumnWidth = (nifta.width - 40f) / 2f;
 
-            lis.Begin(canvas);
+            Listing.Begin(canvas);
 
             Text.Font = GameFont.Medium;
-            lis.Label("Apparel_equip_speed".Translate());
+            Listing.Label("Apparel_equip_speed".Translate());
+            Listing.Gap();
             Text.Font = GameFont.Small;
-            lis.CheckboxLabeled("Change_equip_speeds".Translate(), ref ChangeEquipSpeed);
+            Listing.CheckboxLabeled("Change_equip_speeds".Translate(), ref ChangeEquipSpeed);
+            Listing.Gap();
             if (ChangeEquipSpeed)
             {
-                lis.CheckboxLabeled("Same_speed_for_all_apparel".Translate(), ref FlatRate);
+                Listing.CheckboxLabeled("Same_speed_for_all_apparel".Translate(), ref FlatRate);
 
                 if (FlatRate)
                 {
-                    lis.LabelDouble("Equip_speed_Ticks".Translate(), $"{EquipModTicks} ticks");
-                    lis.IntEntry(ref EquipModTicks, ref buf);
+                    Listing.LabelDouble("Equip_speed_Ticks".Translate(), $"{EquipModTicks} ticks");
+                    Listing.IntEntry(ref EquipModTicks, ref buf);
                 }
                 else
                 {
-                    lis.LabelDouble("Equip_duration".Translate(), $"{EquipModPC.ToStringPercent()}");
-                    EquipModPC = lis.Slider(EquipModPC, 0f, 1f);
+                    Listing.LabelDouble("Equip_duration".Translate(), $"{EquipModPC.ToStringPercent()}");
+                    EquipModPC = Listing.Slider(EquipModPC, 0f, 1f);
                 }
             }
 
-            lis.GapLine();
+            Listing.Gap();
+            Listing.GapLine();
             Text.Font = GameFont.Medium;
-            lis.Label("Apparel_visibility".Translate());
+            Listing.Label("Apparel_visibility".Translate());
             Text.Font = GameFont.Small;
-
-            lis.GapLine();
-
-            GUI.color = Color.green;
-            lis.Label("HatFiltersTip".Translate());
+            Listing.Gap();
+            GUI.color = Color.yellow;
+            Listing.Label("HatFiltersTip".Translate());
             GUI.color = Color.white;
-
-            if (lis.RadioButton("IndoorHidingMode".Translate(), DraftedHidingMode is false, 10))
+            Listing.Gap();
+            if (Listing.ButtonText($"Hide apparel: {apparelHidingMode}"))
             {
-                DraftedHidingMode = false;
+                Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>
+                {
+                    new FloatMenuOption("Never", () => apparelHidingMode = ApparelHidingMode.Never),
+                    new FloatMenuOption("When not drafted", () => apparelHidingMode = ApparelHidingMode.WhenNotDrafted),
+                    new FloatMenuOption("When indoors OR not drafted", () => apparelHidingMode = ApparelHidingMode.IndoorsOrNotDrafted)
+                }));
             }
 
-            if (lis.RadioButton("DraftedHidingMode".Translate(), DraftedHidingMode is true, 10))
+            if (apparelHidingMode != ApparelHidingMode.Never)
             {
-                DraftedHidingMode = true;
+                Listing.Gap();
+                Listing.Label("VisibilityTogglesDesc".Translate());
+                DrawLayerTogglesListbox(Listing, ref graoner1, nifta.height - Listing.CurHeight, ref scrollPosition1, DefDatabase<ApparelLayerDef>.AllDefsListForReading);
             }
 
-            //	lis.CheckboxLabeled("Hide_hats_when_indoors".Translate(), ref HideHats);
-            //lis.CheckboxLabeled("Hide_jackets_when_indoors".Translate(), ref HideJackets);
-            //			lis.CheckboxLabeled("Hide_equipment_when_indoors".Translate(), ref HideEquipment);
-
-            //	lis.GapLine(100);
-
-            Scrollerball(lis, ref graoner1, nifta.height - lis.CurHeight, ref scrollPosition1, DefDatabase<ApparelLayerDef>.AllDefsListForReading);
-
-
-            //lis.CheckboxLabeled("Hats_only_while_drafted".Translate(), ref DraftedHidingMode);
-            //lis.CheckboxLabeled("Jackets_only_while_drafted".Translate(), ref JacketsOnlyWhileDrafted);
-            //lis.CheckboxLabeled("Equipment_only_while_drafted".Translate(), ref EquipmentOnlyWhileDrafted);
-
-            lis.NewColumn();
+            Listing.NewColumn();
             Text.Font = GameFont.Medium;
-            lis.Label("Hair_visibility".Translate());
+            Listing.Label("Hair_visibility".Translate());
             Text.Font = GameFont.Small;
-            var jim = ShowHairUnderHats;
-            lis.CheckboxLabeled("Show_hair_under_hats".Translate(), ref ShowHairUnderHats);
-            if (jim != ShowHairUnderHats)
-            {
-                if (ShowHairUnderHats)
-                {
-                    //bs.ApplyTrans();
-                }
-                else
-                {
-                    //bs.RemoveTrans();
-                }
-            }
 
-            //if (bs.CEdrawhair != null)
-            //{
-            //	GUI.color = Color.red;
-            //	lis.Label("Combat Extended is loaded and has its own hair visibility system");
-            //	GUI.color = Color.white;
-            //}
+            Listing.CheckboxLabeled("Show_hair_under_hats".Translate(), ref ShowHairUnderHats);
 
             if (ShowHairUnderHats)
             {
-                // var gilf = AltHairRenderMode;
-                // lis.CheckboxLabeled("Alternate hair draw mode (for conflicts)", ref AltHairRenderMode);
-                // if (gilf != AltHairRenderMode)
-                // {
-                // 	hairScale_Changed();
-                // }
-
-                //lis.LabelDouble("Hair layer offset", $"{AltHairRenderLayer}");
-                // var tamwy = decimal.Round((decimal)lis.Slider(AltHairRenderLayer, -0.1f, 0.1f), 3);
-                // if (tamwy != (decimal)AltHairRenderLayer)
-                // {
-                // 	AltHairRenderLayer = (float)tamwy;
-                // 	hairScale_Changed();
-                // }
-
-
-                lis.LabelDouble("HatScaling".Translate(), $"{hairMeshScale}");
-                var tamw = decimal.Round((decimal)lis.Slider(hairMeshScale, 0.9f, 1.2f), 3);
+                Listing.LabelDouble("HatScaling".Translate(), $"{hairMeshScale}");
+                var tamw = decimal.Round((decimal)Listing.Slider(hairMeshScale, 0.9f, 1.2f), 3);
                 if (tamw != (decimal)hairMeshScale)
                 {
                     hairMeshScale = (float)tamw;
                     hairScale_Changed();
                 }
 
-                if (lis.ButtonText("HairScaleReset".Translate()))
+                if (Listing.ButtonText("HairScaleReset".Translate()))
                 {
-                    //  hairScaleNarrow = 1.4f;
-                    hairMeshScale = 1.1f;
-                    //AltHairRenderLayer = 0;
+                    hairMeshScale = 1.016f;
                     hairScale_Changed();
                 }
 
-
-                GUI.color = Color.green;
-                lis.Label("HairFiltersTip".Translate());
-                lis.Label("HatHairFiltersTip".Translate());
+                GUI.color = Color.yellow;
+                Listing.Label("HairFiltersTip".Translate());
+                Listing.Label("HatHairFiltersTip".Translate());
                 GUI.color = Color.white;
-                lis.GapLine();
+                Listing.GapLine();
 
-                booger(lis, ref graoner2, nifta.height - lis.CurHeight, ref scrollPosition2, Settings.HatHairCombo);
+                DrawHatHairComboList(Listing, ref graoner2, nifta.height - Listing.CurHeight, ref scrollPosition2, Settings.HatHairCombo);
             }
 
 
-            lis.End();
+            Listing.End();
         }
 
 
         public static float graoner1 = 50f;
         public Vector2 scrollPosition1;
 
-        public static void booger(Listing_Standard listing, ref float groaner, float height, ref Vector2 scrolpos, List<HairHatSet> list)
+        public static void DrawHatHairComboList(Listing_Standard listing, ref float groaner, float height, ref Vector2 scrolpos, List<HairHatSet> list)
         {
             var rect = listing.GetRect(height);
             rect.width = 300;
@@ -324,7 +280,7 @@ namespace QuickFast.Source
         public static float graoner2 = 50f;
         public Vector2 scrollPosition2;
 
-        public static void Scrollerball(Listing_Standard listing, ref float groaner, float height, ref Vector2 scrolpos, List<ApparelLayerDef> list)
+        public static void DrawLayerTogglesListbox(Listing_Standard listing, ref float groaner, float height, ref Vector2 scrolpos, List<ApparelLayerDef> list)
         {
             var rect = listing.GetRect(height);
             rect.width = 300;
@@ -375,13 +331,11 @@ namespace QuickFast.Source
 
         public static void hairScale_Changed()
         {
-            //H_RenderPawn.scalers.Clear();
             if (Find.CurrentMap != null)
             {
                 foreach (var p in Find.CurrentMap.mapPawns.FreeColonists)
                 {
                     p.apparel?.Notify_ApparelChanged();
-                    //H_MiscPatches.PatherCheck(p, p.pather.nextCell, p.pather.lastCell, true);
                 }
             }
         }
@@ -390,19 +344,13 @@ namespace QuickFast.Source
         {
             base.ExposeData();
 
-            //	Scribe_Values.Look(ref AltHairRenderMode, "AltHairRenderMode", false);
-            //	Scribe_Values.Look(ref AltHairRenderLayer, "AltHairRenderLayer", 0f);
-
             Scribe_Values.Look(ref hairMeshScale, "hairMeshScale", 1.06f);
             Scribe_Values.Look(ref ChangeEquipSpeed, "ChangeEquipSpeed");
-            Scribe_Values.Look(ref DraftedHidingMode, "DraftedHidingMode");
+            Scribe_Values.Look(ref apparelHidingMode, "apparelHidingMode");
             Scribe_Values.Look(ref ShowHairUnderHats, "ShowHairUnderHats", true);
             Scribe_Values.Look(ref FlatRate, "FlatRate");
-            Scribe_Values.Look(ref HideHats, "HatsIndoors");
             Scribe_Values.Look(ref EquipModPC, "EquipModPC", 0.2f);
             Scribe_Values.Look(ref EquipModTicks, "EquipModTicks", 10);
-            Scribe_Values.Look(ref HideJackets, "HideJackets");
-            Scribe_Values.Look(ref HideEquipment, "HideEquipment");
             Scribe_Collections.Look(ref DefToStrings, "hairFilter", LookMode.Value);
             Scribe_Collections.Look(ref HatDefToStrings, "hatFilter", LookMode.Value);
             Scribe_Collections.Look(ref LayerVis, "LayerVis", LookMode.Value);
