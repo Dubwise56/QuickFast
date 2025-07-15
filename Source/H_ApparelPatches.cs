@@ -139,7 +139,7 @@ namespace QuickFast.Source
             }
         }
 
-        private static bool ShouldHideApparel(Pawn pawn, Apparel apparel)
+        public static bool ShouldHideApparel(Pawn pawn, Apparel apparel)
         {
             if (Settings.apparelHidingMode == ApparelHidingMode.Never)
             {
